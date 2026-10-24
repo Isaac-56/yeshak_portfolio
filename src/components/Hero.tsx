@@ -1,246 +1,60 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowDown, Download } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 import portrait from '../assets/1.png';
 
-const floatingSkills = [
-  'UI Design', 'UX Research', 'Prototyping', 'Figma',
-  'HTML', 'CSS', 'JavaScript', 'Flutter',
-  'Dart', 'Python', 'C++',
-];
-
 export default function Hero() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 100);
-    return () => clearTimeout(t);
-  }, []);
-
-  return (
-    <section className="relative h-screen flex items-center pt-18 overflow-hidden">
-      {/* Background grid */}
-      <div className="absolute inset-0 grid-bg" />
-      <div className="absolute inset-0 grid-bg-dense animate-grid-pulse" />
-
-      {/* Geometric accents */}
-      <div className="absolute top-1/4 right-[15%] w-px h-40 bg-gradient-to-b from-transparent via-accent/20 to-transparent hidden lg:block" />
-      <div className="absolute bottom-1/3 left-[10%] w-24 h-px bg-gradient-to-r from-transparent via-accent-blue/20 to-transparent hidden lg:block" />
-
-      {/* Scrolling skills ticker - positioned at top below nav */}
-      <div className="absolute top-20 left-0 right-0 overflow-hidden pointer-events-none z-20">
-        <div className="flex whitespace-nowrap animate-scroll">
-          {/* First set of skills */}
-          <div className="flex items-center gap-8 px-4">
-            {floatingSkills.map((skill, i) => (
-              <span
-                key={`${skill}-1`}
-                className="inline-block text-body-sm font-display font-500 text-secondary/80 border border-border/60 rounded-full px-4 py-1.5 bg-bg/80 backdrop-blur-sm"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-          {/* Duplicate for seamless loop */}
-          <div className="flex items-center gap-8 px-4">
-            {floatingSkills.map((skill, i) => (
-              <span
-                key={`${skill}-2`}
-                className="inline-block text-body-sm font-display font-500 text-secondary/80 border border-border/60 rounded-full px-4 py-1.5 bg-bg/80 backdrop-blur-sm"
-              >
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="section-padding relative z-10 w-full">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          {/* Left content */}
-          <div className="lg:col-span-7 space-y-8">
-            <div className="space-y-4">
-              <div
-                className={`flex items-center gap-3 mb-6 transition-all duration-700 ease-out-expo ${
-                  mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                }`}
-              >
-                <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                <span className="text-label font-display font-500 text-secondary uppercase tracking-wider">
-                  Available for opportunities
-                </span>
-              </div>
-              <h1
-                className={`font-display font-700 text-display-xl md:text-display-lg text-primary text-balance transition-all duration-700 ease-out-expo delay-100 ${
-                  mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                }`}
-              >
-                Designing products{' '}
-                <span className="relative inline-block">
-                  people enjoy
-                  <svg
-                    className="absolute -bottom-2 left-0 w-full"
-                    viewBox="0 0 300 12"
-                    fill="none"
-                    preserveAspectRatio="none"
-                  >
-                    <path
-                      d="M2 8C50 2 150 2 298 8"
-                      stroke="#7C3AED"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </span>{' '}
-                using.
-              </h1>
-            </div>
-
-            <p
-              className={`text-body-lg text-secondary max-w-xl transition-all duration-700 ease-out-expo delay-200 ${
-                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              UI/UX Designer | Software Engineering Student
-            </p>
-            <p
-              className={`text-body-md text-secondary max-w-lg leading-relaxed transition-all duration-700 ease-out-expo delay-300 ${
-                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              I create intuitive digital experiences through user-centered design, research, and modern development practices. Currently pursuing a Software Engineering degree while designing digital products that balance usability, aesthetics, and business goals.
-            </p>
-
-            <div
-              className={`flex flex-wrap gap-4 pt-2 transition-all duration-700 ease-out-expo delay-[400ms] ${
-                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              <Link
-                to="/projects"
-                className="group inline-flex items-center gap-3 px-7 py-3.5 bg-primary text-white text-body-sm font-medium rounded-lg hover:bg-accent transition-all duration-300"
-              >
-                View My Work
-                <ArrowDown size={16} className="group-hover:translate-y-0.5 transition-transform" />
-              </Link>
-              <a
-                href="#resume"
-                className="inline-flex items-center gap-3 px-7 py-3.5 border border-border text-primary text-body-sm font-medium rounded-lg hover:border-primary hover:bg-primary hover:text-white transition-all duration-300"
-              >
-                <Download size={16} />
-                Download Resume
-              </a>
+  const [side, setSide] = useState<'design'|'code'|'both'>('both');
+  const [pointer, setPointer] = useState({x:50,y:50});
+  const [ready,setReady] = useState(false);
+  useEffect(()=>{ const t = window.setTimeout(()=>setReady(true),70); return ()=>window.clearTimeout(t); },[]);
+  return <main>
+    <section className="premium-hero relative min-h-[min(900px,100svh)] flex items-center overflow-hidden pt-24 pb-24 section-padding">
+      <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none premium-glow" />
+      <div className={`relative z-10 max-w-[1400px] mx-auto w-full transition-all duration-1000 ${ready?'opacity-100 translate-y-0':'opacity-0 translate-y-8'}`}>
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+          <div className="w-full lg:w-[52%]">
+            <div className="flex items-center gap-3 mb-8"><span className="w-2 h-2 rounded-full bg-accent animate-pulse" /><span className="text-xs uppercase tracking-[0.25em] text-secondary font-semibold">Independent designer & developer · Addis Ababa</span></div>
+            <p className="font-display uppercase tracking-[0.18em] text-xs text-accent mb-4">Portfolio / 2026</p>
+            <h1 className="font-display font-bold text-primary leading-[0.97] tracking-[-0.065em] text-[clamp(3.5rem,8.4vw,8.5rem)]">
+              Digital<br/><span className="premium-outline">by design.</span><br/>Human by<br/>nature.
+            </h1>
+            <p className="mt-8 text-body-lg max-w-xl text-secondary">I'm Yeshak — a UI/UX designer who codes, and a developer who thinks in experiences. I turn complex ideas into digital products people want to use.</p>
+            <div className="flex items-center flex-wrap gap-4 mt-9">
+              <Link to="/projects" className="premium-pill bg-primary text-bg inline-flex items-center gap-4 px-6 py-4 font-semibold text-sm">Explore my work <ArrowUpRight size={18}/></Link>
+              <Link to="/about" className="premium-pill inline-flex items-center gap-4 px-6 py-4 border border-border text-primary font-semibold text-sm">More about me <ArrowDownRight size={18}/></Link>
             </div>
           </div>
-
-          {/* Right - Professional framed portrait */}
-          <div className="lg:col-span-5 flex justify-center lg:justify-end mt-8 lg:mt-12">
-            <div
-              className={`relative transition-all duration-700 ease-out-expo delay-300 ${
-                mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              {/* Main framed container - 3 zone card: header bar / image area / footer bar */}
-              <div className="w-72 md:w-80 lg:w-[22rem] relative rounded-2xl border border-border shadow-2xl overflow-hidden bg-white">
-                {/* Header bar (kept empty/minimal - no plate/dimension text) */}
-                <div className="h-7 border-b border-border/40" />
-
-                {/* Image area with cream background */}
-                <div className="relative bg-[#F7F1E1] aspect-[4/4.2]">
-                  <img
-                    src={portrait}
-                    alt="Yeshak Tsegaye - UI/UX Designer & Software Engineer"
-                    className="w-full h-full object-cover"
-                  />
+          <div className="w-full max-w-[520px] lg:w-[45%]">
+            <div className="premium-portrait group relative rounded-[2rem] overflow-hidden border border-border bg-bg-alt" onPointerMove={e=>{
+              if(e.pointerType==='touch') return;
+              const r=e.currentTarget.getBoundingClientRect(); const x=(e.clientX-r.left)/r.width*100;const y=(e.clientY-r.top)/r.height*100;
+              setPointer({x,y}); setSide(x<42?'design':x>58?'code':'both');
+            }} onPointerLeave={()=>setSide('both')} style={{'--pointer-x':pointer.x+'%','--pointer-y':pointer.y+'%'} as React.CSSProperties}>
+              <div className="relative aspect-[4/4.8] overflow-hidden">
+                <img src={portrait} alt="Portrait of Yeshak Tsegaye" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="premium-code-layer absolute inset-0" aria-hidden="true">
+                  <div className="premium-code-lines font-mono text-xs sm:text-sm">
+                    <p><span>const</span> experience = {'{'}</p><p>&nbsp; empathy: true,</p><p>&nbsp; craft: 'pixel-perfect',</p><p>&nbsp; build: 'with-purpose'</p><p>{'}'};</p>
+                  </div>
                 </div>
-
-                {/* Footer bar with name (left) and title (right) */}
-                <div className="h-14 border-t border-border/40 flex items-center justify-between px-6">
-                  <span className="font-display font-700 text-primary text-sm tracking-tight">
-                    Yeshak Tsegaye
-                  </span>
-                  <span className="text-[11px] font-display font-400 text-secondary tracking-[0.05em]">
-                    Designer / Engineer
-                  </span>
+                <div className="premium-design-layer absolute inset-0" aria-hidden="true"><span className="premium-design-ring"/><span className="premium-design-asterisk">✳</span><span className="premium-design-note">FORM / FUNCTION</span></div>
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/50 pointer-events-none transition-opacity" style={{opacity:side==='both'?.6:.15}}/>
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 bg-gradient-to-t from-black/75 to-transparent text-white flex justify-between items-end pointer-events-none">
+                  <span className={`font-display font-semibold text-2xl sm:text-3xl transition-transform ${side==='design'?'translate-y-[-6px]':''}`}>Designer<span className="block text-xs tracking-widest font-normal opacity-80 mt-1">CREATIVE THINKING</span></span>
+                  <span className={`font-display font-semibold text-2xl sm:text-3xl text-right transition-transform ${side==='code'?'translate-y-[-6px]':''}`}>Coder<span className="block text-xs tracking-widest font-normal opacity-80 mt-1">TECHNICAL CRAFT</span></span>
                 </div>
               </div>
-
-              {/* Floating labels - smaller, refined pills, tucked closer to the card edge */}
-              <div
-                className="absolute top-6 -right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-md border border-border/70 animate-float-label"
-                style={{ animationDelay: '0s' }}
-              >
-                <span className="w-1 h-1 rounded-full bg-accent" />
-                <span className="text-[9px] font-display font-600 text-accent tracking-wide whitespace-nowrap">UX Research</span>
-              </div>
-
-              <div
-                className="absolute top-1/3 -right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-md border border-border/70 animate-float-label"
-                style={{ animationDelay: '0.8s' }}
-              >
-                <span className="w-1 h-1 rounded-full bg-accent-blue" />
-                <span className="text-[9px] font-display font-600 text-accent-blue tracking-wide whitespace-nowrap">UI Design</span>
-              </div>
-
-              <div
-                className="absolute bottom-24 -right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-md border border-border/70 animate-float-label"
-                style={{ animationDelay: '1.6s' }}
-              >
-                <span className="w-1 h-1 rounded-full bg-primary" />
-                <span className="text-[9px] font-display font-600 text-primary tracking-wide whitespace-nowrap">Figma</span>
-              </div>
-
-              <div
-                className="absolute top-6 -left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-md border border-border/70 animate-float-label"
-                style={{ animationDelay: '2s' }}
-              >
-                <span className="w-1 h-1 rounded-full bg-accent-blue" />
-                <span className="text-[9px] font-display font-600 text-accent-blue tracking-wide whitespace-nowrap">CSS</span>
-              </div>
-
-              <div
-                className="absolute top-1/3 -left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-md border border-border/70 animate-float-label"
-                style={{ animationDelay: '0.4s' }}
-              >
-                <span className="w-1 h-1 rounded-full bg-primary" />
-                <span className="text-[9px] font-display font-600 text-primary tracking-wide whitespace-nowrap">JavaScript</span>
-              </div>
-
-              <div
-                className="absolute bottom-24 -left-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-md border border-border/70 animate-float-label"
-                style={{ animationDelay: '1.2s' }}
-              >
-                <span className="w-1 h-1 rounded-full bg-accent" />
-                <span className="text-[9px] font-display font-600 text-accent tracking-wide whitespace-nowrap">Prototyping</span>
-              </div>
             </div>
+            <p className="text-secondary text-xs uppercase tracking-[0.18em] text-center mt-4">Move across the portrait · Explore both sides</p>
           </div>
         </div>
       </div>
-
-      {/* Scroll indicator - aesthetic design with bigger arrow */}
-      <div
-        className={`absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 transition-all duration-700 ease-out-expo delay-[800ms] ${
-          mounted ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        <span className="text-[11px] font-display font-medium text-secondary/50 tracking-[0.25em] uppercase">
-          Scroll
-        </span>
-        <div
-          className="flex flex-col items-center cursor-pointer group"
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-        >
-          {/* Decorative line above arrow */}
-          <div className="w-px h-8 bg-gradient-to-b from-transparent via-secondary/20 to-secondary/40 group-hover:via-accent/40 group-hover:to-accent/60 transition-all duration-500" />
-          {/* Bigger aesthetic arrow */}
-          <ArrowDown
-            size={28}
-            className="text-secondary/40 -mt-0.5 animate-bounce-arrow group-hover:text-accent/70 transition-all duration-300 group-hover:scale-110"
-            strokeWidth={1.5}
-          />
-        </div>
-      </div>
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-secondary text-xs tracking-[0.2em] uppercase hidden sm:flex gap-3 items-center">Scroll to explore <ArrowDownRight size={16}/></div>
     </section>
-  );
+    <section className="py-6 border-y border-border overflow-hidden" aria-label="Specialties">
+      <div className="premium-marquee text-primary font-display font-semibold uppercase text-xl md:text-2xl whitespace-nowrap" aria-hidden="true">{Array(4).fill(' UI/UX DESIGN ✳ CREATIVE DEVELOPMENT ✳ DIGITAL PRODUCTS ✳ USER RESEARCH ✳ ').join('')}</div>
+    </section>
+  </main>;
 }
