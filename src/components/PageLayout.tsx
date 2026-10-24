@@ -1,55 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { useReveal } from '../hooks/useReveal';
-
-interface PageLayoutProps {
-  label: string;
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-}
-
-export default function PageLayout({ label, title, subtitle, children }: PageLayoutProps) {
-  const { pathname } = useLocation();
-  const ref = useReveal();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return (
-    <main className="pt-24 pb-30 min-h-screen relative">
-      <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none" />
-
-      <div className="section-padding relative z-10">
-        <div className="max-w-[1400px] mx-auto" ref={ref}>
-          {/* Back link */}
-          <Link
-            to="/"
-            className="reveal inline-flex items-center gap-2 text-body-sm font-medium text-secondary hover:text-primary transition-colors mb-12"
-          >
-            <ArrowLeft size={16} />
-            Back to Home
-          </Link>
-
-          {/* Page header */}
-          <div className="reveal reveal-delay-1 mb-16">
-            <span className="text-label font-display font-600 text-accent uppercase tracking-wider block mb-4">
-              {label}
-            </span>
-            <h1 className="font-display font-700 text-display-lg text-primary text-balance mb-4">
-              {title}
-            </h1>
-            {subtitle && (
-              <p className="text-body-lg text-secondary max-w-2xl">{subtitle}</p>
-            )}
-          </div>
-
-          {/* Page content */}
-          {children}
-        </div>
-      </div>
-    </main>
-  );
+type Props={label:string;title:string;subtitle?:string;children:ReactNode};
+export default function PageLayout({label,title,subtitle,children}:Props){
+ const {pathname}=useLocation();const ref=useReveal();
+ useEffect(()=>{window.scrollTo({top:0,behavior:'instant'});},[pathname]);
+ return <main className="min-h-screen pt-32 pb-30 relative">
+  <div className="absolute inset-0 grid-bg opacity-40 pointer-events-none"/>
+  <div className="section-padding relative z-10"><div className="max-w-[1400px] mx-auto" ref={ref}>
+   <div className="reveal flex flex-wrap items-center justify-between gap-5 border-b border-border pb-6 mb-12">
+    <span className="text-xs uppercase tracking-[0.24em] font-semibold text-accent">/ {label}</span>
+    <Link to="/contact" className="inline-flex gap-2 items-center text-secondary hover:text-accent text-sm">Have a project? <ArrowUpRight size={16}/></Link>
+   </div>
+   <div className="reveal reveal-delay-1 mb-16 md:mb-24">
+    <h1 className="font-display font-bold text-primary tracking-[-0.055em] leading-[1.03] text-[clamp(3rem,8vw,7.25rem)] max-w-[1100px]">{title}</h1>
+    {subtitle&&<p className="text-body-lg text-secondary max-w-2xl mt-8">{subtitle}</p>}
+   </div>
+   {children}
+  </div></div>
+ </main>;
 }
