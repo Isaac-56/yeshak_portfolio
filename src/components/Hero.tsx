@@ -40,7 +40,7 @@ export default function Hero() {
                   </div>
                 </div>
                 <div className="premium-design-layer absolute inset-0" aria-hidden="true"><span className="premium-design-ring"/><span className="premium-design-asterisk">✳</span><span className="premium-design-note">FORM / FUNCTION</span></div>
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-white/50 pointer-events-none transition-opacity" style={{opacity:side==='both'?.6:.15}}/>
+                <div className="absolute top-0 bottom-0 w-px bg-white/50 pointer-events-none transition-[left,opacity] duration-300" style={{left:`${pointer.x}%`,opacity:side==='both'?.6:.15}}/>
                 <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 bg-gradient-to-t from-black/75 to-transparent text-white flex justify-between items-end pointer-events-none">
                   <span className={`font-display font-semibold text-2xl sm:text-3xl transition-transform ${side==='design'?'translate-y-[-6px]':''}`}>Designer<span className="block text-xs tracking-widest font-normal opacity-80 mt-1">CREATIVE THINKING</span></span>
                   <span className={`font-display font-semibold text-2xl sm:text-3xl text-right transition-transform ${side==='code'?'translate-y-[-6px]':''}`}>Coder<span className="block text-xs tracking-widest font-normal opacity-80 mt-1">TECHNICAL CRAFT</span></span>
