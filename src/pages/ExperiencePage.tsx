@@ -1,123 +1,19 @@
 import PageLayout from '../components/PageLayout';
 import { useReveal } from '../hooks/useReveal';
-import { Palette, Search, Layers, Users, Zap, Briefcase, Calendar, MapPin } from 'lucide-react';
-
-const coreSkills = [
-  { icon: Palette, label: 'UI/UX Design', description: 'Creating pixel-perfect interfaces and seamless user experiences from research through delivery.' },
-  { icon: Search, label: 'Research', description: 'Conducting user interviews, surveys, and usability tests to drive evidence-based design decisions.' },
-  { icon: Layers, label: 'Prototyping', description: 'Building interactive prototypes at varying fidelities to validate concepts before development.' },
-  { icon: Users, label: 'Collaboration', description: 'Working effectively across design, engineering, and product teams to ship cohesive experiences.' },
-  { icon: Zap, label: 'Problem Solving', description: 'Breaking down complex challenges into structured, solvable design problems with clear outcomes.' },
-];
-
-const achievements = [
-  { value: '2+', label: 'Years Experience' },
-  { value: '5+', label: 'Major Projects Delivered' },
-  { value: '30+', label: 'Users Interviewed' },
-  { value: '85%+', label: 'Avg Task Completion' },
-];
-
-export default function ExperiencePage() {
-  const ref = useReveal();
-
-  return (
-    <PageLayout
-      label="Experience"
-      title="2 Years Internship Experience"
-      subtitle="Hands-on experience applying design thinking and user research to real-world products, collaborating with cross-functional teams to deliver meaningful outcomes."
-    >
-      <div ref={ref}>
-        {/* Achievement stats */}
-        <div className="reveal grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          {achievements.map(({ value, label }, i) => (
-            <div
-              key={label}
-              className={`reveal reveal-delay-${i + 1} bg-white border border-border rounded-2xl p-6 text-center card-hover`}
-            >
-              <div className="font-display font-700 text-display-sm text-primary mb-1">{value}</div>
-              <div className="text-body-sm text-secondary">{label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Experience entry */}
-        <div className="reveal reveal-delay-2 bg-white border border-border rounded-2xl p-8 md:p-10 mb-12">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Briefcase size={16} className="text-accent" />
-                <span className="text-label font-display font-600 text-accent uppercase tracking-wider">
-                  Internship
-                </span>
-              </div>
-              <h3 className="font-display font-600 text-display-sm text-primary">
-                UI/UX Design Intern
-              </h3>
-            </div>
-            <div className="flex items-center gap-4 text-body-sm text-secondary">
-              <span className="inline-flex items-center gap-1.5">
-                <Calendar size={14} />
-                2 Years
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <MapPin size={14} />
-                Addis Ababa
-              </span>
-            </div>
-          </div>
-
-          <p className="text-body-md text-secondary leading-relaxed mb-8">
-            During my internship, I contributed to the full design lifecycle — from initial research and concept development through prototyping, handoff, and post-launch iteration. I worked alongside senior designers and engineers, learning to balance user needs, business requirements, and technical constraints.
-          </p>
-
-          <div className="space-y-2 mb-4">
-            <span className="text-label font-display font-600 text-secondary uppercase tracking-wider block mb-4">
-              Key Contributions
-            </span>
-            <div className="space-y-3">
-              {[
-                'Led end-to-end design for multiple product features, from research through implementation',
-                'Conducted over 30 user interviews and synthesized findings into actionable design requirements',
-                'Created and maintained a component-based design system used across the product suite',
-                'Collaborated daily with engineering teams, providing specs, assets, and QA support',
-                'Improved key usability metrics including task completion rate and onboarding time',
-              ].map((item) => (
-                <div key={item} className="flex items-start gap-3">
-                  <div className="w-5 h-5 mt-0.5 rounded border border-accent/30 bg-accent/5 flex items-center justify-center flex-shrink-0">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent" />
-                  </div>
-                  <span className="text-body-sm text-secondary">{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Core competencies */}
-        <div>
-          <div className="reveal mb-8">
-            <span className="text-label font-display font-600 text-accent-blue uppercase tracking-wider">
-              Core Competencies
-            </span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {coreSkills.map(({ icon: Icon, label, description }, i) => (
-              <div
-                key={label}
-                className={`reveal reveal-delay-${Math.min(i + 1, 5)} flex items-start gap-4 p-6 bg-white border border-border rounded-xl card-hover`}
-              >
-                <div className="w-10 h-10 rounded-lg bg-accent-light flex items-center justify-center flex-shrink-0">
-                  <Icon size={20} className="text-accent" />
-                </div>
-                <div>
-                  <span className="font-display font-600 text-body-md text-primary block mb-1">{label}</span>
-                  <p className="text-body-sm text-secondary">{description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </PageLayout>
-  );
-}
+import { BriefcaseBusiness, MapPin, ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+export default function ExperiencePage(){const ref=useReveal();return <PageLayout label="Experience" title="Learning by doing." subtitle="My work combines practical design experience with an ongoing software engineering education.">
+ <div ref={ref} className="space-y-6">
+  <article className="reveal premium-project rounded-3xl p-8 md:p-12">
+   <div className="flex items-center gap-2 text-accent uppercase tracking-[.2em] text-xs font-semibold mb-8"><BriefcaseBusiness size={17}/> Design experience</div>
+   <div className="flex flex-col md:flex-row md:justify-between gap-5"><h2 className="font-display font-bold text-4xl md:text-5xl text-primary">UI/UX Design Intern</h2><div className="text-secondary text-sm flex flex-col gap-2"><span>Approximately 2 years</span><span className="inline-flex items-center gap-2"><MapPin size={15}/> Addis Ababa</span></div></div>
+   <p className="text-body-lg text-secondary max-w-3xl mt-8">Experience exploring product concepts, researching user needs, translating problems into interface decisions, and communicating visual designs and prototypes. My software engineering background helps connect the design and build phases.</p>
+  </article>
+  <article className="reveal reveal-delay-1 premium-project rounded-3xl p-8 md:p-12">
+   <span className="text-accent uppercase tracking-[.2em] text-xs font-semibold">Ongoing education</span>
+   <h2 className="font-display font-bold text-3xl md:text-4xl text-primary mt-6">Software Engineering</h2>
+   <p className="text-secondary text-body-lg mt-5 max-w-3xl">Building technical foundations in programming, product development, and modern software workflows while applying design thinking to real interface challenges.</p>
+  </article>
+  <div className="reveal py-10 flex justify-between items-center border-b border-border"><p className="text-secondary">Interested in working together?</p><Link to="/contact" className="flex items-center gap-2 text-primary font-semibold">Get in touch <ArrowUpRight size={17}/></Link></div>
+ </div>
+ </PageLayout>}
