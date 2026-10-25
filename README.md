@@ -1,28 +1,28 @@
-# Yeshak — Motion Portfolio / Revised
+# Yeshak — Motion Portfolio V3 / GitHub review branch
 
-An original personal portfolio taking inspiration from premium interaction patterns: restrained typography, route-curtain transitions, reveal choreography, magnetic interactions, a theme-responsive cinematic hero, a full-screen rounded-edge menu, and film-quality project presentations.
+This is the standalone V3 React portfolio. No files in the default `main` branch were changed.
 
-## Start
+## Get it in VS Code
 
-```sh
+```powershell
+cd C:\Projects\yeshak_portfolio
+git fetch origin
+git switch redesign/portfolio-v3-review
 npm install
 npm run dev
 ```
 
-## Validation
+If you have uncommitted local changes, stash or commit them before switching branches.
+`npm install` automatically restores the genuine Figma design screens, both light/dark hero images, About portrait and three Full HD web-preview videos from versioned `media/images/*.jsonl` and `media/videos/*.jsonl` packs. No separate ChatGPT ZIP download is needed.
 
-```sh
-npm run build
-```
+Use `npm run build` to validate your production bundle.
 
-The project contains 229 extracted Figma pages in seven case studies and three carefully encoded full-HD (1920×1080) project videos. The optional 4K file pack contains 3840×2160 Lanczos-upscaled versions that can be selected on large screens after extraction; **these are upscales, not native 4K captures**, and cannot recover missing source detail.
+## Media information
 
-To enable the optional 4K video quality button, extract `Yeshak_Portfolio_4K_Optional.zip` into this folder, preserving `public/projects/..` paths. Otherwise the player uses full-HD automatically.
+The original Figma collection contains 229 screens across seven portfolio case studies. The website's optimized web previews are 1920x1080 H.264. The videos recorded by the user were originally Full HD; upscaling to 3840x2160 **does not create genuine 4K detail**.
 
-## Theme alignment
-
-Both homepage backgrounds are derived from the same 1536×1024 photograph so the silhouette, head/neck tilt and outfit **remain perfectly registered** during the theme crossfade. Dark mode is stylized through color/painterly grading rather than a different posed illustration. The About portrait preserves the pixels of the original supplied illustration, with the floating labels removed outside the face area.
+Optional GitHub Actions workflow `.github/workflows/render-v3-4k.yml` creates 3840x2160 upscaled previews and commits them to the review branch if GitHub Actions has write access. You may also generate them locally by installing FFmpeg and running `npm run media:4k`.
 
 ## Publishing
 
-The project is provided as a separate code package for review. It is not publicly deployed, and no changes to GitHub `main` are made.
+This is a review branch; do not merge or deploy publicly without the owner's approval.

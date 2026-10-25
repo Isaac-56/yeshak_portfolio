@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "postinstall": "node scripts/restore-media.mjs",
     "predev": "node scripts/restore-media.mjs",
-    "prebuild": "node scripts/restore-media.mjs"
+    "prebuild": "node scripts/restore-media.mjs",
+    "media:4k": "node scripts/generate-4k.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",

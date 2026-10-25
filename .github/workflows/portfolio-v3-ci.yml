@@ -1,0 +1,25 @@
+name: V3 portfolio quality checks
+on:
+  push:
+    branches: ["redesign/portfolio-v3-review"]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install
+      - run: npm run build
+      - name: Check project media
+        run: |
+          test -f public/images/hero-light.webp
+          test -f public/images/hero-dark.webp
+          test -f public/projects/baby-nest/preview.mp4
+          test -f public/projects/reclaim/preview.mp4
+          test -f public/projects/yenebet/preview.mp4

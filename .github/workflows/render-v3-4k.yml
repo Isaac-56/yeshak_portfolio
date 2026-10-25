@@ -1,0 +1,36 @@
+name: Generate optional 4K previews
+on:
+  push:
+    branches: ["redesign/portfolio-v3-review"]
+    paths:
+      - "media/**"
+      - "scripts/**"
+      - ".github/workflows/render-v3-4k.yml"
+permissions:
+  contents: write
+jobs:
+  upscale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Restore media from repository packs
+        run: node scripts/restore-media.mjs
+      - name: Ensure FFmpeg exists
+        run: command -v ffmpeg || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - name: Render optional 4K-resolution upscales
+        run: npm run media:4k
+      - name: Commit optional 4K previews to review branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/projects/baby-nest/preview-4k.mp4 public/projects/reclaim/preview-4k.mp4 public/projects/yenebet/preview-4k.mp4
+          if ! git diff --cached --quiet; then
+            git commit -m "Add optional 4K-resolution project preview upscales"
+            git push origin HEAD:redesign/portfolio-v3-review
+          fi
