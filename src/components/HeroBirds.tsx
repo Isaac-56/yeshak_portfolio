@@ -6,9 +6,9 @@ import './HeroBirds.css';
  * the two backgrounds are crossfading.
  */
 const flocks = [
-  { name: 'distant', birds: [0, 1, 2, 3] },
-  { name: 'high', birds: [0, 1, 2] },
-  { name: 'near', birds: [0, 1] },
+  { name: 'distant', birds: [0, 1, 2] },
+  { name: 'high', birds: [0, 1] },
+  { name: 'near', birds: [0] },
 ] as const;
 
 function Gull({index}:{index:number}) {
