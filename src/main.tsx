@@ -97,7 +97,7 @@ function Home(){
     <div className="hero-corner hero-corner-bottom"><span>Available for select projects <span className="availability-dot"/></span><a href="#selected-work">Scroll to explore <ArrowDownRight size={17}/></a></div>
   </section>
   <section className="intro wrap" data-reveal><div className="intro-left"><span className="section-kicker">01 / An introduction</span><h2>Thoughtful design.<br/><em>Purposeful code.</em><br/>Better experiences.</h2></div><div className="intro-right"><p>I'm Yeshak, a designer and developer who cares about how things <em>feel</em>, not only how they look. I build digital experiences with intention, curiosity and craft.</p><Link data-magnetic className="round-cta" to="/about">About me <ArrowUpRight size={20}/></Link></div></section>
-  <Works limit={4}/>
+  <Works featuredOnly/><Works explorationsOnly/>
   <section className="approach wrap" data-reveal><div><span className="section-kicker">03 / Beyond the interface</span><h2>Making digital<br/>feel <em>human.</em></h2></div><div><p>From early research and interaction systems to the final line of code, every decision should move the experience forward.</p><Link className="underlined-link" to="/about">My approach <ArrowUpRight size={18}/></Link></div></section>
   <Marquee/>
  </main>}
@@ -110,12 +110,28 @@ function PreviewVideo({p,controls=false}:{p:Project;controls?:boolean}){
   },[]);
   return <video ref={ref} src={`/projects/${p.slug}/preview.mp4`} muted={!controls} loop={!controls} playsInline preload="metadata" poster={`/projects/${p.slug}/poster.jpg`} controls={controls} aria-label={`${p.name} interface animation`}/>;
 }
-function WorkCard({p,index}:{p:Project;index:number}){return <Link data-cursor="View" to={`/work/${p.slug}`} className="work-card" data-reveal aria-label={`View ${p.name} case study`}>
-  <div className="work-cover" style={{background:p.accent}}>{p.video?<PreviewVideo p={p}/>:<img src={imageFor(p.slug,1)} loading="lazy" alt={`${p.name} design screen`}/>}<div className="work-cover-shade"/><span className="view-chip">View case <ArrowUpRight size={19}/></span></div>
-  <div className="work-info"><div><h3>{p.name}</h3><span>{p.kind}</span></div><div className="project-number">{String(index+1).padStart(2,'0')}</div></div>
+function CoverDevices({p}:{p:Project}){
+ const main=p.slug==='blog-app'?10:p.slug==='directed'?3:p.slug==='medical-app'?3:p.slug==='sarabi'?1:2;
+ const second=p.slug==='blog-app'?2:p.slug==='directed'?2:p.slug==='medical-app'?14:p.slug==='sarabi'?2:5;
+ return <div className={`cover-devices ${p.slug==='sarabi'?'cover-devices-browser':''}`} aria-hidden="true">
+  {p.slug==='sarabi'? <div className="cover-browser"><div className="browser-top"><i/><i/><i/><span>sarabi.restaurant</span></div><div className="browser-viewport"><img src={imageFor(p.slug,main)} loading="lazy" alt=""/></div></div>:null}
+  <div className="cover-device cover-device-back"><div className="cover-bezel"><div className="cover-screen"><img src={imageFor(p.slug,second)} loading="lazy" alt=""/></div></div></div>
+  <div className="cover-device cover-device-front"><div className="cover-bezel"><div className="cover-screen"><img src={imageFor(p.slug,main)} loading="lazy" alt=""/></div></div></div>
+ </div>
+}
+function WorkCard({p,index}:{p:Project;index:number}){return <Link data-cursor="View" to={`/work/${p.slug}`} className={`work-card ${p.featured?'work-card-featured':''}`} data-reveal aria-label={`View ${p.name} case study`}>
+ <div className="work-cover" style={{background:p.accent}}>{p.video?<PreviewVideo p={p}/>:<CoverDevices p={p}/>}<div className="work-cover-shade"/>{p.video&&<span className="favorite-indicator">FEATURED / MOTION</span>}<span className="view-chip">View case <ArrowUpRight size={19}/></span></div>
+ <div className="work-info"><div><h3>{p.name}</h3><span>{p.kind}</span></div><div className="project-number">{String(index+1).padStart(2,'0')}</div></div>
  </Link>}
-function Works({limit}:{limit?:number}){const ps=limit?projects.slice(0,limit):projects;return <section id="selected-work" className="works wrap"><div className="section-head" data-reveal><span className="section-kicker">02 / Selected work</span><span>2026 — {ps.length} projects</span></div><div className="work-grid">{ps.map((p,i)=><WorkCard p={p} index={i} key={p.slug}/>)}</div>{limit&&<div className="work-more"><Link data-magnetic to="/work">More work <ArrowUpRight size={20}/></Link></div>}</section>}
-function AllWork(){return <main className="inner-page"><header className="page-header wrap" data-reveal><span className="section-kicker">Designs, studies & experiments — 2026</span><h1>Selected <em>work.</em></h1><p>Seven projects. Different challenges. The same commitment to making every interaction count.</p></header><Works/></main>}
+function Works({featuredOnly=false,explorationsOnly=false}:{featuredOnly?:boolean;explorationsOnly?:boolean}){
+ const ps=projects.filter(p=>featuredOnly?!!p.featured:explorationsOnly?!p.featured:true);
+ const title=featuredOnly?'02 / Featured motion projects':explorationsOnly?'03 / More selected work':'02 / Selected work';
+ return <section id={!explorationsOnly?'selected-work':'explorations'} className={`works wrap ${featuredOnly?'works-featured':explorationsOnly?'works-explorations':''}`}>
+ <div className="section-head" data-reveal><span className="section-kicker">{title}</span><span>{featuredOnly?'Three favorite projects · Film previews':explorationsOnly?'Interface studies & explorations':'Featured projects first · All case studies'} </span></div>
+ <div className={`work-grid ${featuredOnly?'work-grid-featured':''}`}>{ps.map((p,i)=><WorkCard p={p} index={projects.indexOf(p)} key={p.slug}/>)}</div>
+ {featuredOnly&&<div className="work-more"><Link data-magnetic to="/work">Explore every project <ArrowUpRight size={20}/></Link></div>}
+ </section>}
+function AllWork(){return <main className="inner-page"><header className="page-header wrap" data-reveal><span className="section-kicker">Designs, studies & experiments — 2026</span><h1>Selected <em>work.</em></h1><p>Three favorite projects in motion, followed by four detailed interface explorations. Open any project for its complete screen gallery.</p></header><Works featuredOnly/><Works explorationsOnly/></main>}
 function Phone({src,label}:{src:string;label:string}){
  const pane=useRef<HTMLDivElement>(null);const animation=useRef<number>(0);
  const stop=()=>{if(animation.current)cancelAnimationFrame(animation.current);animation.current=0};
