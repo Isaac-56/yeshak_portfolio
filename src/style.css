@@ -33,3 +33,59 @@
 .video-quality button{color:#fff;background:#15151baf;border:1px solid #ffffff70;border-radius:40px;padding:8px 14px;font-size:11px}
 .video-quality button.active{background:#f7f6f2;color:#17171a;border-color:#f7f6f2}
 @media(max-width:600px){.video-quality{top:8px;left:10px;right:10px}.video-quality>span{display:none}}
+/* V3 precision pass — typography, featured projects, device chrome, thumbnail staging */
+.hero-title-wrap{overflow:visible;inset-inline:0;padding-inline:clamp(16px,3vw,60px);bottom:12%;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.hero-title{width:auto;max-width:100%;margin:0;letter-spacing:-.065em;font-size:clamp(2.65rem,10.3vw,10.8rem);line-height:1.13;text-align:center;white-space:nowrap;text-shadow:0 2px 26px #0004}
+.hero-title span{display:inline-block;vertical-align:baseline;padding-block:.09em .13em}
+.hero-title sup{vertical-align:top;font-size:clamp(9px,1vw,15px);letter-spacing:0;margin-left:.24em}
+.hero-photo{background-color:#211827;background-repeat:no-repeat;transform:translate3d(0,var(--hero-drift,0px),0) scale(1.04);background-size:cover;background-position:center 50%;image-rendering:auto}
+:root[data-theme=dark] .hero{background:#080915}
+:root[data-theme=dark] .hero-shade{background:linear-gradient(180deg,#05051080 0%,transparent 26%,#09071533 65%,#05050a88 100%)}
+/* Featured work: deliberate hierarchy and three-in-a-row collection */
+.works-featured{padding-top:8px;padding-bottom:80px}
+.works-explorations{padding-top:25px;padding-bottom:135px}
+.work-grid-featured{grid-template-columns:repeat(3,minmax(0,1fr));gap:25px}
+.work-grid-featured .work-cover{aspect-ratio:1.14}
+.work-grid-featured .work-info h3{font-size:clamp(25px,2.1vw,35px)}
+.favorite-indicator{position:absolute;top:20px;left:20px;z-index:2;font-size:10px;letter-spacing:.15em;font-weight:700;background:#101115aa;color:white;padding:10px 14px;border-radius:99px;backdrop-filter:blur(10px)}
+.works-explorations .work-grid{row-gap:65px}
+/* All image thumbnails are framed as actual devices, not floating stretched screenshots */
+.cover-devices{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;isolation:isolate;overflow:hidden;background-image:radial-gradient(ellipse at 45% 38%,#ffffffcc,transparent 67%)}
+.cover-devices::after{content:"";position:absolute;z-index:-1;width:74%;height:15%;left:13%;bottom:5%;background:#29253434;filter:blur(40px);border-radius:50%}
+.cover-device{position:absolute;width:31%;aspect-ratio:9/19.5;max-height:86%;padding:6px;background:#11131a;border-radius:clamp(17px,2.2vw,32px);box-shadow:0 27px 38px #0004,0 0 0 1px #fff4 inset;overflow:hidden;transition:transform .85s cubic-bezier(.2,1,.2,1)}
+.cover-device-back{transform:translate(-42%,9%) rotate(-14deg) scale(.93);z-index:1}
+.cover-device-front{transform:translate(41%,0%) rotate(11deg);z-index:2}
+.work-card:hover .cover-device-back{transform:translate(-53%,4%) rotate(-20deg) scale(.96)}
+.work-card:hover .cover-device-front{transform:translate(52%,-3%) rotate(16deg) scale(1.02)}
+.cover-bezel{width:100%;height:100%;border-radius:clamp(13px,1.8vw,26px);background:#0c0e14;padding:8px 2px 4px;overflow:hidden}
+.cover-screen{width:100%;height:100%;overflow:hidden;border-radius:clamp(9px,1.3vw,20px);background:#fff}
+.cover-screen img{width:100%;height:auto;max-width:none;max-height:none;display:block;object-fit:initial;filter:none;transform:none}
+.work-card:hover .cover-screen img{transform:none!important}
+.cover-browser{position:absolute;width:71%;aspect-ratio:1.65;border:5px solid #222631;background:#fff;border-radius:11px;box-shadow:0 30px 40px #0004;overflow:hidden;left:11%;top:17%;z-index:1;transform:rotate(-6deg);transition:transform .8s}
+.cover-browser .browser-top{height:24px;background:#e5e7eb;border-bottom:1px solid #ccc;display:flex;align-items:center;gap:4px;padding-left:9px}
+.cover-browser .browser-top i{height:5px;width:5px;background:#abb0bb;border-radius:50%}
+.cover-browser .browser-top span{font-size:7px;color:#666;margin-left:9px}
+.cover-browser .browser-viewport{height:calc(100% - 24px);overflow:hidden;background:white}
+.cover-browser img{width:100%;height:auto;max-width:none;filter:none;object-fit:initial;transform:none}
+.cover-devices-browser .cover-device{width:21%;right:8%;left:auto;top:18%;height:72%;transform:rotate(11deg);z-index:2}
+.cover-devices-browser .cover-device-back{display:none}
+.cover-devices-browser .cover-device-front{transform:rotate(11deg)}
+.work-card:hover .cover-browser{transform:rotate(-8deg) scale(1.02)}
+.work-card:hover .cover-devices-browser .cover-device-front{transform:rotate(15deg) translateY(-5px)}
+/* Gallery: safe outer bezels, internal scrolling, zero content clipped behind notch */
+.screen-art{height:620px;padding:30px 18px 22px}
+.device-frame{height:min(100%,558px);width:auto;aspect-ratio:9/19.5;border:0;border-radius:clamp(32px,3.2vw,47px);padding:0;background:#15161a;box-shadow:0 25px 48px #0003,0 0 0 2px #6665 inset;position:relative;overflow:hidden}
+.device-scroller{position:absolute;top:21px;bottom:22px;left:7px;right:7px;height:auto;width:auto;border-radius:clamp(22px,2.7vw,35px);overflow-y:auto;overflow-x:hidden;background:#fff;scrollbar-width:none;overscroll-behavior:contain;}
+.device-scroller img{display:block;width:100%;height:auto;min-height:0;object-fit:contain;max-width:none;max-height:none;}
+.device-camera{top:8px;left:50%;width:23%;height:5px;border-radius:6px;background:#5c5e63;z-index:3;}
+.device-homebar{bottom:8px;left:39%;width:22%;height:4px;background:#85888e;border-radius:4px;z-index:3;}
+/* Prevent oversized artwork from bleeding outside the gallery grid */
+.screen-card{border-radius:5px;min-width:0;overflow:hidden}
+.screen-art>.device-frame{max-width:100%;}
+.work-card .work-cover video{object-position:center;filter:none}
+/* Keep video posters sharp and avoid ineffective CSS image resampling */
+@media (max-width:1100px){.work-grid-featured{grid-template-columns:repeat(2,minmax(0,1fr))}.work-grid-featured .work-card:nth-child(3){grid-column:1/-1;width:calc(50% - 12.5px);margin:auto}.hero-title{font-size:10vw}}
+@media (max-width:720px){.hero-title-wrap{bottom:30%;padding-inline:14px}.hero-title{font-size:10.2vw;letter-spacing:-.07em}.hero-title sup{font-size:8px}.work-grid-featured{grid-template-columns:1fr;gap:35px}.work-grid-featured .work-card:nth-child(3){grid-column:auto;width:100%}.work-grid-featured .work-cover{aspect-ratio:1.36}.cover-device{width:35%;padding:5px}.screen-art{height:560px;padding:20px 12px}.works-featured,.works-explorations{padding-bottom:70px}.favorite-indicator{top:15px;left:15px}}
+@media (prefers-reduced-motion:reduce){.cover-device,.cover-browser,.hero-photo{transition:none!important}}
+/* Opt-in 4K dark hero color-grade. Same geometry as light photo for seamless switching. */
+.dark-scene{background-image:url('/images/hero-dark-4k.webp')}
