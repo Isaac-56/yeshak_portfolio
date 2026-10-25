@@ -21,15 +21,15 @@ function HomePage() {
 export default function App() {
   const [theme, setTheme] = useState<PortfolioTheme>(() => {
     try {
-      const saved = localStorage.getItem('yeshak-theme');
+      const saved = localStorage.getItem('yeshak-theme-v2');
       if (saved === 'light' || saved === 'dark') return saved;
     } catch { /* private browsing */ }
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return 'light';
   });
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     document.documentElement.style.colorScheme = theme;
-    try { localStorage.setItem('yeshak-theme', theme); } catch { /* storage disabled */ }
+    try { localStorage.setItem('yeshak-theme-v2', theme); } catch { /* storage disabled */ }
   }, [theme]);
 
   return (
