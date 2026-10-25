@@ -16,6 +16,7 @@ jobs:
           node-version: '22'
       - run: npm install
       - run: npm run build
+      - run: npm run audit:media
       - name: Check project media
         run: |
           test -f public/images/hero-light.webp
