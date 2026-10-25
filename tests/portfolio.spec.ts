@@ -135,6 +135,7 @@ test('Sarabi uses tablet presentation and automatically scrolls until hovered',a
   await page.goto('/work/sarabi');
   const first=page.locator('.screen-card').first();
   await expect(first.locator('.device-frame-tablet')).toBeVisible();
+  await expect(first.locator('.device-scroller img')).toHaveAttribute('src','/projects/sarabi/tablet-preview.webp');
   await expect(first.getByRole('button',{name:'Scroll inside'})).toHaveAttribute('aria-pressed','true');
   const scroller=first.locator('.device-scroller');
   await scroller.scrollIntoViewIfNeeded();
