@@ -197,3 +197,67 @@
 @media(max-width:1100px){.screen-art{height:590px}}
 @media(max-width:720px){.screen-art{height:580px;padding:16px 10px}.screen-preview .device-frame{max-width:calc(100% - 10px)}.screen-preview .device-frame-full{width:min(100%,350px)}.screen-view-toggle button{padding:8px 11px}}
 @media (prefers-reduced-motion:reduce){.screen-view-toggle button{transition:none}}
+
+/* V5: Dennis-inspired editorial scale, with original Yeshak branding. */
+.site-nav .nav-wrap{width:min(calc(100% - 9%),1480px)}
+.site-nav .brand{font-family:'DM Sans',sans-serif;font-size:clamp(19px,1.47vw,23px);font-weight:600;letter-spacing:-.043em;line-height:1.2;transition:opacity .25s}
+.site-nav .brand:hover{opacity:.66}
+.site-nav .desktop-links{gap:clamp(28px,3.1vw,50px);font-family:'DM Sans',sans-serif;font-size:clamp(17px,1.23vw,20px);font-weight:500;letter-spacing:-.032em}
+.site-nav .desktop-links a{padding-block:15px}
+.site-nav .desktop-links a::after{bottom:9px;height:1.5px}
+.site-nav .menu-toggle{font-size:17px;font-weight:600;letter-spacing:-.025em}
+.site-nav .mode-toggle{height:45px;width:45px}
+.fullscreen-inner nav a{font-size:clamp(4rem,7.4vw,8.4rem);line-height:1.24}
+/* Branded page-to-page curtain, matching the launch splash rhythm. */
+.page-transition-overlay{
+ position:fixed;inset:0;z-index:550;pointer-events:auto;
+ display:flex;align-items:center;justify-content:center;
+ background:#1b1b20;color:#f7f6f4;overflow:hidden;
+ transform:translate3d(0,105%,0);
+}
+.page-transition-center{
+ display:flex;align-items:center;gap:clamp(13px,1.65vw,27px);
+ font:500 clamp(56px,7.9vw,142px)/1.1 'Manrope',sans-serif;
+ letter-spacing:-.073em;max-width:94vw;
+}
+.page-transition-center span:last-child{
+ display:block;white-space:nowrap;overflow:hidden;
+ text-overflow:ellipsis;max-width:80vw;
+ animation:transition-word .5s .16s both cubic-bezier(.2,.8,.2,1);
+}
+.page-transition-dot{color:#d3c5ff;font-size:.45em;line-height:1;align-self:center;transform:translateY(-.04em)}
+.page-transition-signature{
+ position:absolute;bottom:7.5vh;left:50%;transform:translateX(-50%);
+ font:500 15px 'DM Sans',sans-serif;letter-spacing:-.02em;white-space:nowrap;opacity:.72;
+}
+.page-transition-cover{animation:page-curtain-cover .62s cubic-bezier(.77,0,.18,1) forwards}
+.page-transition-hold{transform:translate3d(0,0,0)}
+.page-transition-uncover{transform:translate3d(0,0,0);animation:page-curtain-uncover .72s cubic-bezier(.77,0,.18,1) forwards}
+@keyframes page-curtain-cover{
+ 0%{transform:translate3d(0,105%,0);border-radius:48% 48% 0 0}
+ 100%{transform:translate3d(0,0,0);border-radius:0}
+}
+@keyframes page-curtain-uncover{
+ 0%{transform:translate3d(0,0,0);border-radius:0}
+ 100%{transform:translate3d(0,-105%,0);border-radius:0 0 47% 47%}
+}
+@keyframes transition-word{
+ from{opacity:0;transform:translateY(30%)}
+ to{opacity:1;transform:translateY(0)}
+}
+@media(max-width:950px){
+ .site-nav .nav-wrap{width:calc(100% - 8%)}
+ .site-nav .brand{font-size:18px}
+ .site-nav .desktop-links{gap:23px;font-size:16px}
+ .site-nav .menu-toggle{font-size:15px}
+}
+@media(max-width:720px){
+ .site-nav .nav-wrap{width:calc(100% - 42px)}
+ .site-nav .brand{font-size:16px}
+ .page-transition-center{font-size:clamp(43px,10vw,72px);gap:13px}
+ .page-transition-signature{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ .page-transition-overlay{display:none!important}
+ .page-transition-center span:last-child{animation:none!important}
+}
