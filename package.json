@@ -11,7 +11,8 @@
     "predev": "node scripts/restore-media.mjs",
     "prebuild": "node scripts/restore-media.mjs",
     "media:4k": "node scripts/generate-4k.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "audit:media": "node scripts/audit-media.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
