@@ -1,93 +1,58 @@
-/* Coastal atmosphere — synchronized flying silhouettes for both hero themes.
-   GPU transform animations only, never blocking clicks or text selection. */
+/* V4 coastal birds: restrained game-loading-screen atmosphere in the sky corner only.
+   Never crosses the person, title, or center hero area. */
 .hero-birds{
-  position:absolute;z-index:2;inset:0;overflow:hidden;pointer-events:none;
-  contain:paint;isolation:isolate;
-  --bird-color:#1b2231;--bird-opacity:.58;
-  transition:opacity .8s ease;
+  position:absolute;
+  z-index:2;
+  inset:clamp(110px,11%,170px) clamp(15px,4%,85px) auto auto;
+  width:clamp(215px,30vw,470px);
+  height:clamp(140px,23vw,285px);
+  max-width:45%;
+  overflow:hidden;contain:paint;isolation:isolate;
+  pointer-events:none;
+  mask-image:linear-gradient(90deg,transparent 0%,#000 14% 82%,transparent 100%);
+  --bird-color:#202534;--bird-opacity:.56;
+  transition:filter .8s ease;
 }
-:root[data-theme="dark"] .hero-birds{
-  --bird-color:#e0d7ff;--bird-opacity:.74;
+:root[data-theme=dark] .hero-birds{
+  --bird-color:#ffbeea;--bird-opacity:.74;
+  filter:drop-shadow(0 0 4px #e35fff70);
 }
-.hero-sky-grain{
-  position:absolute;inset:0;opacity:0;
-  background-image:radial-gradient(circle at 16% 16%,#ddbbff90 0 1px,transparent 1.8px),
-    radial-gradient(circle at 38% 24%,#ffe6fa90 0 1px,transparent 1.8px),
-    radial-gradient(circle at 68% 13%,#aaa3eb90 0 1px,transparent 1.8px),
-    radial-gradient(circle at 85% 25%,#e5d8ff90 0 1px,transparent 1.8px);
-  background-size:100% 100%;
-  transition:opacity 1.5s ease;
-  filter:drop-shadow(0 0 5px #b3a0ff85);
-}
-:root[data-theme="dark"] .hero-sky-grain{opacity:.7}
+.hero-sky-grain{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;
+  background-image:radial-gradient(circle at 19% 22%,#e1d2ff 0 1px,transparent 1.7px),
+    radial-gradient(circle at 54% 37%,#d7c1ff 0 1px,transparent 1.7px),
+    radial-gradient(circle at 74% 16%,#bca7ff 0 1px,transparent 1.7px)}
+:root[data-theme=dark] .hero-sky-grain{opacity:.75}
 .hero-flock{
-  position:absolute;left:-22%;display:flex;align-items:center;gap:clamp(13px,1.5vw,27px);
-  width:max-content;color:var(--bird-color);opacity:var(--bird-opacity);
+  position:absolute;left:-27%;width:max-content;
+  display:flex;align-items:center;gap:clamp(8px,1.15vw,18px);
+  opacity:var(--bird-opacity);color:var(--bird-color);
   will-change:transform;
 }
-.hero-flock-distant{
-  top:27%;transform:translate3d(0,0,0) scale(.62);
-  animation:coastal-fly-a 43s linear -17s infinite;
-}
-.hero-flock-high{
-  top:18%;transform:translate3d(0,0,0) scale(.8);
-  animation:coastal-fly-b 59s linear -41s infinite;
-}
-.hero-flock-near{
-  top:37%;transform:translate3d(0,0,0) scale(1.02);
-  animation:coastal-fly-c 50s linear -24s infinite;
-}
-.gull{
-  width:clamp(31px,3.25vw,53px);height:auto;overflow:visible;
-  filter:drop-shadow(0 1px 2px #ffffff16);
-}
+.hero-flock-distant{top:18%;animation:corner-bird-drift-one 25s linear -7s infinite}
+.hero-flock-high{top:45%;animation:corner-bird-drift-two 32s linear -20s infinite}
+.hero-flock-near{top:72%;animation:corner-bird-drift-three 29s linear -15s infinite}
+.gull{width:clamp(21px,2.05vw,36px);height:auto;overflow:visible;filter:drop-shadow(0 2px 2px #0002)}
 .gull path{fill:currentColor;transform-box:fill-box}
-.gull-left{transform-origin:100% 90%;animation:gull-wing-left 3.2s ease-in-out infinite}
-.gull-right{transform-origin:0% 90%;animation:gull-wing-right 3.2s ease-in-out infinite}
-.gull-body{opacity:.9}
-.gull-2{transform:translateY(16px) scale(.72)}
-.gull-3{transform:translateY(-10px) scale(.92)}
-.gull-4{transform:translateY(21px) scale(.65)}
-.gull-2 .gull-left,.gull-2 .gull-right{animation-delay:-1.1s}
-.gull-3 .gull-left,.gull-3 .gull-right{animation-delay:-2.2s}
-.gull-4 .gull-left,.gull-4 .gull-right{animation-delay:-.6s}
-@keyframes gull-wing-left{
-  0%,100%{transform:rotate(0deg) scaleY(1)}
-  46%{transform:rotate(19deg) scaleY(.73)}
-  72%{transform:rotate(-7deg) scaleY(1.12)}
-}
-@keyframes gull-wing-right{
-  0%,100%{transform:rotate(0deg) scaleY(1)}
-  46%{transform:rotate(-19deg) scaleY(.73)}
-  72%{transform:rotate(7deg) scaleY(1.12)}
-}
-@keyframes coastal-fly-a{
-  0%{transform:translate3d(-8vw,4vh,0) scale(.62)}
-  45%{transform:translate3d(64vw,-3vh,0) scale(.65)}
-  100%{transform:translate3d(157vw,-10vh,0) scale(.66)}
-}
-@keyframes coastal-fly-b{
-  0%{transform:translate3d(-10vw,-3vh,0) scale(.8)}
-  50%{transform:translate3d(73vw,1vh,0) scale(.82)}
-  100%{transform:translate3d(163vw,-7vh,0) scale(.83)}
-}
-@keyframes coastal-fly-c{
-  0%{transform:translate3d(-10vw,2vh,0) scale(1.02)}
-  50%{transform:translate3d(79vw,-5vh,0) scale(1.01)}
-  100%{transform:translate3d(168vw,-13vh,0) scale(.98)}
-}
-.hero-shade{z-index:1}
-.hero-corner,.hero-side-label,.hero-title-wrap{z-index:3}
+.gull-left{transform-origin:100% 90%;animation:corner-flap-left 3.1s ease-in-out infinite}
+.gull-right{transform-origin:0% 90%;animation:corner-flap-right 3.1s ease-in-out infinite}
+.gull-body{opacity:.82}
+.gull-2{transform:translateY(12px) scale(.7)}
+.gull-3{transform:translateY(-11px) scale(.86)}
+.gull-2 .gull-left,.gull-2 .gull-right{animation-delay:-1.25s}
+.gull-3 .gull-left,.gull-3 .gull-right{animation-delay:-2.15s}
+@keyframes corner-flap-left{0%,100%{transform:rotate(-8deg) scaleY(1)}45%{transform:rotate(20deg) scaleY(.72)}70%{transform:rotate(-18deg) scaleY(1.08)}}
+@keyframes corner-flap-right{0%,100%{transform:rotate(8deg) scaleY(1)}45%{transform:rotate(-20deg) scaleY(.72)}70%{transform:rotate(18deg) scaleY(1.08)}}
+@keyframes corner-bird-drift-one{0%{transform:translate3d(-14%,10px,0) scale(.61)}52%{transform:translate3d(31vw,-10px,0) scale(.64)}100%{transform:translate3d(61vw,-26px,0) scale(.62)}}
+@keyframes corner-bird-drift-two{0%{transform:translate3d(-24%,0,0) scale(.78)}52%{transform:translate3d(25vw,-16px,0) scale(.81)}100%{transform:translate3d(61vw,-27px,0) scale(.79)}}
+@keyframes corner-bird-drift-three{0%{transform:translate3d(-25%,15px,0) scale(.8)}52%{transform:translate3d(22vw,-18px,0) scale(.79)}100%{transform:translate3d(63vw,-43px,0) scale(.73)}}
 @media(max-width:720px){
-  .hero-flock-near{top:29%}
-  .hero-flock-distant{top:18%}
-  .hero-flock-high{top:12%}
-  .gull{width:33px}
-  .hero-flock{gap:9px}
+ .hero-birds{top:13%;right:3%;width:45vw;height:130px;max-width:45vw}
+ .gull{width:21px}
+ .hero-flock{gap:8px}
 }
 @media(prefers-reduced-motion:reduce){
-  .hero-flock{animation:none!important;transform:translate3d(28vw,0,0) scale(.75)!important}
-  .hero-flock-high{transform:translate3d(58vw,0,0) scale(.67)!important}
-  .hero-flock-near{transform:translate3d(80vw,0,0) scale(.85)!important}
-  .gull-left,.gull-right{animation:none!important}
+ .hero-flock{animation:none!important;transform:translate3d(30%,0,0) scale(.7)!important}
+ .hero-flock-high{transform:translate3d(80%,0,0) scale(.6)!important}
+ .hero-flock-near{transform:translate3d(60%,0,0) scale(.75)!important}
+ .gull-left,.gull-right{animation:none!important}
 }
