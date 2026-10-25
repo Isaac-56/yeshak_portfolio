@@ -286,3 +286,12 @@ body{overflow-x:hidden}
 .ds-nav-home .ds-theme{border-color:#ffffff70}
 .ds-project-image img[src],.ds-case-gallery img[src]{color:transparent}
 html[data-theme=dark] .ds-circle-link{background:#e8e8e8;color:#161719}
+
+/* Theme-responsive cinematic hero artwork */
+.ds-hero-image .ds-hero-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 53%;transition:opacity 850ms cubic-bezier(.22,1,.36,1),transform 1100ms ease;filter:none;}
+html[data-theme="light"] .ds-hero-photo-light{opacity:1;}
+html[data-theme="light"] .ds-hero-photo-dark{opacity:0;}
+html[data-theme="dark"] .ds-hero-photo-light{opacity:0;}
+html[data-theme="dark"] .ds-hero-photo-dark{opacity:1;}
+.ds-hero-image .ds-hero-vignette{pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.32),transparent 25%,rgba(0,0,0,.34));}
+@media (prefers-reduced-motion:reduce){.ds-hero-image .ds-hero-photo{transition:none;}}
