@@ -110,3 +110,57 @@ test('reduced motion disables decorative animation',async ({page})=>{
   expect(animation).toBe('none');
   await expect(page.locator('.hero-birds .gull')).toHaveCount(6);
 });
+
+
+test('internal navigation runs the Yeshak-branded cover and reveal sequence',async ({page})=>{
+  await page.goto('/');
+  await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+  await page.locator('.desktop-links a[href="/about"]').click();
+  await expect(page.locator('.page-transition-overlay')).toBeVisible();
+  await expect(page.locator('.page-transition-center')).toContainText('About');
+  await expect(page.locator('.page-transition-signature')).toContainText('Yeshak');
+  await expect(page).toHaveURL(/\/about$/);
+  await expect(page.locator('.page-transition-overlay')).toHaveCount(0,{timeout:5000});
+  await page.locator('.desktop-links a[href="/work"]').click();
+  await expect(page.locator('.page-transition-center')).toContainText('Work');
+  await expect(page).toHaveURL(/\/work$/);
+  await expect(page.locator('.page-transition-overlay')).toHaveCount(0,{timeout:5000});
+  await page.locator('.desktop-links a[href="/contact"]').click();
+  await expect(page.locator('.page-transition-center')).toContainText('Contact');
+  await expect(page).toHaveURL(/\/contact$/);
+  await expect(page.locator('.page-transition-overlay')).toHaveCount(0,{timeout:5000});
+});
+
+test('Sarabi uses tablet presentation and automatically scrolls until hovered',async ({page})=>{
+  await page.goto('/work/sarabi');
+  const first=page.locator('.screen-card').first();
+  await expect(first.locator('.device-frame-tablet')).toBeVisible();
+  await expect(first.getByRole('button',{name:'Scroll inside'})).toHaveAttribute('aria-pressed','true');
+  const scroller=first.locator('.device-scroller');
+  await scroller.scrollIntoViewIfNeeded();
+  await expect(scroller.locator('img')).toBeVisible();
+  await page.waitForTimeout(1800);
+  const before=await scroller.evaluate(el=>el.scrollTop);
+  expect(before).toBeGreaterThan(10);
+  await scroller.hover();
+  const pausedAt=await scroller.evaluate(el=>el.scrollTop);
+  await page.waitForTimeout(700);
+  const during=await scroller.evaluate(el=>el.scrollTop);
+  expect(Math.abs(during-pausedAt)).toBeLessThan(3);
+  await page.locator('.case-heading h1').hover();
+  await page.waitForTimeout(200);
+  const after=await scroller.evaluate(el=>el.scrollTop);
+  expect(after).toBeLessThan(25);
+});
+
+test('birds remain within the upper-right sky stage, never crossing the person',async ({page})=>{
+  await page.goto('/');
+  const stage=await page.locator('.hero-birds').boundingBox();
+  const hero=await page.locator('.hero').boundingBox();
+  expect(stage).not.toBeNull();expect(hero).not.toBeNull();
+  if(!stage||!hero)return;
+  expect(stage.x).toBeGreaterThan(hero.x+hero.width*.45);
+  expect(stage.y).toBeLessThan(hero.y+hero.height*.45);
+  const style=await page.locator('.hero-flock-distant').evaluate(el=>getComputedStyle(el).animationName);
+  expect(style).toMatch(/corner-bird-drift/);
+});
