@@ -149,3 +149,51 @@
 @media(max-width:930px){.contact-layout{grid-template-columns:1fr;gap:50px}.contact-heading{padding-bottom:55px}.contact-back{margin-bottom:45px}.contact-aside{max-width:none}.contact-form-panel{padding:clamp(25px,5vw,45px)}}
 @media(max-width:560px){.contact-heading h1{font-size:clamp(42px,10vw,62px)}.contact-layout{gap:35px;padding-bottom:65px}.contact-fields-row{grid-template-columns:1fr;gap:25px}.contact-form{gap:24px}.contact-form-top{margin-bottom:30px}.contact-method{grid-template-columns:44px minmax(0,1fr) 18px;gap:12px}.contact-icon{height:42px;width:42px}.contact-form-actions{align-items:flex-start;flex-direction:column}.contact-outro{padding-bottom:70px}}
 @media(prefers-reduced-motion:reduce){.contact-method,.contact-method-arrow,.contact-send,.contact-reset{transition:none!important}}
+
+
+/* V4: accurate gallery framing, editorial navigation, high-res paired hero. */
+.light-scene{background-image:url('/images/hero-light-4k.webp')!important}
+.dark-scene{background-image:url('/images/hero-dark-4k.webp')!important}
+.hero-photo{image-rendering:auto;filter:none!important;background-position:center 50%;background-size:cover}
+:root[data-theme=dark] .hero-shade{background:linear-gradient(180deg,rgba(9,7,21,.40) 0%,transparent 36%,rgba(6,5,18,.15) 70%,rgba(5,4,14,.48) 100%)}
+.brand{font-size:clamp(17px,1.25vw,21px);font-weight:600;letter-spacing:-.04em;line-height:1.2}
+.desktop-links{font-size:clamp(15px,1.06vw,18px);font-weight:500;gap:clamp(26px,3.25vw,53px)}
+.desktop-links a{padding-block:14px}
+.menu-toggle{font-size:16px;font-weight:600}
+.site-nav .nav-wrap{max-width:1480px}
+@media (max-width:850px){.brand{font-size:17px}.desktop-links{font-size:15px;gap:19px}}
+@media (max-width:720px){.brand{font-size:16px}}
+/* Phone gallery is pixel-faithful; original export ratios are never replaced. */
+.screen-art{height:640px;min-height:0;padding:19px 14px 19px;overflow:visible}
+.screen-preview{width:100%;height:100%;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.screen-preview .device-frame{flex:0 1 auto;min-height:0;max-height:calc(100% - 37px);max-width:min(100%,330px)}
+.screen-preview-tall .device-frame{max-height:calc(100% - 96px)}
+.screen-preview-hint{font-size:10px;letter-spacing:.08em;line-height:1.4;color:var(--muted);text-align:center;max-width:100%;text-transform:uppercase}
+.screen-view-toggle{flex:0 0 auto;display:flex;align-items:center;gap:2px;background:var(--panel);border:1px solid var(--line);padding:3px;border-radius:99px;z-index:3}
+.screen-view-toggle button{cursor:pointer;background:transparent;border:0;color:var(--muted);padding:9px 14px;font-size:11px;border-radius:99px;transition:background .3s,color .3s}
+.screen-view-toggle button.active{background:var(--fg);color:var(--bg)}
+.screen-view-toggle button:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.screen-preview .device-scroller{overscroll-behavior:contain}
+.screen-preview .device-scroller img{display:block;width:100%;height:auto;max-width:100%;max-height:none;object-fit:contain;object-position:center top;transform:none}
+.screen-preview .device-frame:not(.device-frame-full){width:auto;aspect-ratio:9 / 19.5;padding:0;overflow:hidden}
+.screen-preview .device-frame:not(.device-frame-full) .device-scroller{inset:21px 7px 22px;width:auto;height:auto;border-radius:clamp(22px,2.7vw,35px);overflow-x:hidden;overflow-y:auto;display:block}
+.screen-preview .device-frame-full{width:min(100%,340px);height:calc(100% - 96px);max-height:none;aspect-ratio:auto;border:1px solid var(--line);background:var(--panel);padding:14px;border-radius:6px;box-shadow:0 20px 48px #00000012,0 0 0 6px var(--soft);overflow:hidden;display:grid;place-items:center}
+.screen-preview .device-frame-full .device-scroller{position:relative;inset:auto!important;width:100%;height:100%;overflow:hidden!important;background:transparent;border-radius:0!important;display:flex!important;align-items:center;justify-content:center}
+.screen-preview .device-frame-full .device-scroller img{width:auto!important;height:auto!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center center!important}
+.screen-preview .device-frame-full .device-camera,.screen-preview .device-frame-full .device-homebar{display:none}
+.screen-art-long{background-image:radial-gradient(circle at 50% 46%,#ffffff70,transparent 70%)}
+:root[data-theme=dark] .screen-art-long{background-image:radial-gradient(circle at 50% 43%,#b29de51e,transparent 70%)}
+.screen-card{overflow:hidden;min-width:0}
+.screen-card:focus-within{outline:1px solid var(--fg);outline-offset:2px}
+.screen-details button{min-height:38px;cursor:pointer}
+.screen-details button:hover{text-decoration:underline;text-underline-offset:4px}
+.lightbox-scroll{overscroll-behavior:contain;max-height:calc(100dvh - 125px);overflow:auto;scrollbar-width:thin}
+.lightbox-scroll img{max-width:100%;width:100%;height:auto;display:block;object-fit:contain}
+/* Work covers get matched source ratios instead of cropping Figma pages. */
+.cover-device .cover-screen{display:grid;place-items:center;background:#f8f7f4}
+.cover-device .cover-screen img{width:100%!important;height:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;transform:none!important}
+.cover-browser .browser-viewport{display:flex;align-items:flex-start;justify-content:center;overflow:hidden}
+.cover-browser .browser-viewport img{height:auto;width:100%;object-fit:contain;object-position:top center}
+@media(max-width:1100px){.screen-art{height:590px}}
+@media(max-width:720px){.screen-art{height:580px;padding:16px 10px}.screen-preview .device-frame{max-width:calc(100% - 10px)}.screen-preview .device-frame-full{width:min(100%,350px)}.screen-view-toggle button{padding:8px 11px}}
+@media (prefers-reduced-motion:reduce){.screen-view-toggle button{transition:none}}
