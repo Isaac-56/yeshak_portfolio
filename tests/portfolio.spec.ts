@@ -5,7 +5,7 @@ const projects = ['baby-nest','reclaim','yenebet','medical-app','directed','blog
 test('hero, theme alignment, bird animations and featured previews', async ({page}) => {
   await page.goto('/');
   await expect(page.getByRole('heading',{name:/Yeshak Tsegaye/})).toBeVisible();
-  await expect(page.locator('.hero-birds .gull')).toHaveCount(9);
+  await expect(page.locator('.hero-birds .gull')).toHaveCount(6);
   await expect(page.locator('.works-featured .work-card')).toHaveCount(3);
   await expect(page.locator('.works-explorations .work-card')).toHaveCount(4);
   await expect(page.locator('.works-featured video')).toHaveCount(3);
@@ -15,7 +15,7 @@ test('hero, theme alignment, bird animations and featured previews', async ({pag
   await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await expect(page.locator('.dark-scene')).toHaveCSS('opacity','1');
-  await expect(page.locator('.hero-birds .gull')).toHaveCount(9);
+  await expect(page.locator('.hero-birds .gull')).toHaveCount(6);
   await page.getByRole('button',{name:/Activate photographic light mode/}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
   const birdAnimation=await page.locator('.hero-flock-distant').evaluate(el=>getComputedStyle(el).animationName);
@@ -49,6 +49,13 @@ for (const slug of projects) {
     await page.goto(`/work/${slug}`);
     await expect(page.locator('.case-heading h1')).toBeVisible();
     await expect(page.locator('.screen-card').first()).toBeVisible();
+  const firstCard=page.locator('.screen-card').first();
+  if(await firstCard.locator('.screen-view-toggle').count()){
+    await firstCard.getByRole('button',{name:'Full design'}).click();
+    await expect(firstCard.locator('.device-frame')).toHaveClass(/device-frame-full/);
+    await firstCard.getByRole('button',{name:'Scroll inside'}).click();
+    await expect(firstCard.locator('.device-frame')).not.toHaveClass(/device-frame-full/);
+  }
     await expect(page.locator('.device-frame').first()).toBeVisible();
     const content = await page.locator('.device-scroller').first().evaluate(el=>({
       clientWidth:el.clientWidth,
@@ -101,5 +108,5 @@ test('reduced motion disables decorative animation',async ({page})=>{
   await page.goto('/');
   const animation=await page.locator('.hero-flock-distant').evaluate(el=>getComputedStyle(el).animationName);
   expect(animation).toBe('none');
-  await expect(page.locator('.hero-birds .gull')).toHaveCount(9);
+  await expect(page.locator('.hero-birds .gull')).toHaveCount(6);
 });
