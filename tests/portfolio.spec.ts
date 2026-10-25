@@ -19,7 +19,7 @@ test('hero, theme alignment, bird animations and featured previews', async ({pag
   await page.getByRole('button',{name:/Activate photographic light mode/}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
   const birdAnimation=await page.locator('.hero-flock-distant').evaluate(el=>getComputedStyle(el).animationName);
-  expect(birdAnimation).toContain('coastal-fly');
+  expect(birdAnimation).toContain('corner-bird-drift');
 });
 
 test('animated menu, keyboard navigation and route transitions', async ({page}) => {
