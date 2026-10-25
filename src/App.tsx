@@ -2,10 +2,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
-import Statistics from './components/Statistics';
+import ProjectShowcase from './components/ProjectShowcase';
 import Footer from './components/Footer';
 import AboutPage from './pages/AboutPage';
 import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 import ProcessPage from './pages/ProcessPage';
 import SkillsPage from './pages/SkillsPage';
 import ExperiencePage from './pages/ExperiencePage';
@@ -14,7 +15,7 @@ import ContactPage from './pages/ContactPage';
 export type PortfolioTheme = 'light' | 'dark';
 
 function HomePage() {
-  return <><Hero /><Statistics /></>;
+  return <><Hero /><ProjectShowcase limit={4} /></>;
 }
 
 export default function App() {
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/:slug" element={<ProjectDetailPage />} />
           <Route path="/process" element={<ProcessPage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/experience" element={<ExperiencePage />} />
