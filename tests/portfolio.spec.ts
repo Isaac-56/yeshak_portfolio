@@ -67,16 +67,16 @@ for (const slug of projects) {
 
 test('contact form preserves fields, validates required values, and reports successful EmailJS response', async ({page}) => {
   await page.goto('/contact');
-  await expect(page.getByLabel('Name')).toBeVisible();
-  await expect(page.getByLabel('Email')).toBeVisible();
-  await expect(page.getByLabel('Subject')).toBeVisible();
-  await expect(page.getByLabel('Message')).toBeVisible();
+  await expect(page.locator('#contact-name')).toBeVisible();
+  await expect(page.locator('#contact-email')).toBeVisible();
+  await expect(page.locator('#contact-subject')).toBeVisible();
+  await expect(page.locator('#contact-message')).toBeVisible();
   await page.getByRole('button',{name:/Send message/}).click();
   await expect(page.locator('.contact-success')).toHaveCount(0);
-  await page.getByLabel('Name').fill('Preview tester');
-  await page.getByLabel('Email').fill('preview@example.com');
-  await page.getByLabel('Subject').fill('Preview test');
-  await page.getByLabel('Message').fill('This is a simulated test, not a real email.');
+  await page.locator('#contact-name').fill('Preview tester');
+  await page.locator('#contact-email').fill('preview@example.com');
+  await page.locator('#contact-subject').fill('Preview test');
+  await page.locator('#contact-message').fill('This is a simulated test, not a real email.');
   await page.route('**/api.emailjs.com/**',route=>route.fulfill({
     status:200, contentType:'application/json', body:JSON.stringify({status:200,text:'OK'}),
     headers:{'access-control-allow-origin':'*'}
@@ -84,7 +84,7 @@ test('contact form preserves fields, validates required values, and reports succ
   await page.getByRole('button',{name:/Send message/}).click();
   await expect(page.getByText('Message sent.')).toBeVisible({timeout:15000});
   await page.getByRole('button',{name:/Send another message/}).click();
-  await expect(page.getByLabel('Name')).toBeVisible();
+  await expect(page.locator('#contact-name')).toBeVisible();
 });
 
 test('mobile viewport stays in bounds on main pages',async ({page})=>{
