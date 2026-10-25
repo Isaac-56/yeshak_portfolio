@@ -5,6 +5,7 @@ import {ArrowDownRight, ArrowRight, ArrowUpRight, ArrowLeft, Sun, Moon, Menu, X,
 import {projects, imageFor, type Project} from './projects';
 import manifest from '../public/projects/manifest.json';
 import ContactPage from './components/ContactPage';
+import HeroBirds from './components/HeroBirds';
 import './style.css';
 
 type Theme = 'light'|'dark';
@@ -56,6 +57,25 @@ function App(){
   useEffect(()=>{document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;try{localStorage.setItem('yt-theme-final',theme)}catch{}},[theme]);
   useEffect(()=>{const timer=window.setTimeout(()=>setLoader(false),1150);return()=>clearTimeout(timer)},[]);
   useEffect(()=>{document.body.style.overflow=menu?'hidden':'';return()=>{document.body.style.overflow=''}},[menu]);
+  useEffect(()=>{
+    if(!menu)return;
+    const previouslyFocused=document.activeElement as HTMLElement|null;
+    document.querySelector<HTMLAnchorElement>('.fullscreen-menu nav a')?.focus({preventScroll:true});
+    const onKey=(event:KeyboardEvent)=>{
+      if(event.key==='Escape'){event.preventDefault();setMenu(false);return;}
+      if(event.key!=='Tab')return;
+      const links=[...document.querySelectorAll<HTMLAnchorElement>('.fullscreen-menu-open nav a')];
+      if(!links.length)return;
+      const current=links.indexOf(document.activeElement as HTMLAnchorElement);
+      if(event.shiftKey && current===0){event.preventDefault();links[links.length-1].focus();}
+      else if(!event.shiftKey && current===links.length-1){event.preventDefault();links[0].focus();}
+    };
+    window.addEventListener('keydown',onKey);
+    return()=>{window.removeEventListener('keydown',onKey);previouslyFocused?.focus({preventScroll:true});};
+  },[menu]);
+  useEffect(()=>{
+    document.title=path==='/contact'?'Contact | Yeshak Tsegaye':path==='/about'?'About | Yeshak Tsegaye':path==='/work'?'Selected Work | Yeshak Tsegaye':path.startsWith('/work/')?`${projects.find(p=>p.slug===path.split('/')[2])?.name||'Project'} | Yeshak Tsegaye`:'Yeshak Tsegaye — Designer & Developer';
+  },[path]);
   const project=path.startsWith('/work/')?projects.find(p=>p.slug===path.split('/')[2]):undefined;
   const isHome=path==='/' || (!!project&&false);
   let page:React.ReactNode;
@@ -68,19 +88,20 @@ function App(){
   return <>
     <div className={`preloader ${loader?'preloader-active':'preloader-finished'}`} aria-hidden="true"><span>Yeshak<span className="period">.</span></span><div className="preloader-bar"/></div>
     <Cursor/>
+    <a className="skip-to-content" href="#site-content">Skip to content</a>
     <header className={`site-nav ${isHome?'site-nav-hero':'site-nav-page'} ${menu?'site-nav-open':''}`}>
       <div className="nav-wrap"><Link className="brand" to="/">© Code by Yeshak</Link>
       <nav className="desktop-links" aria-label="Main navigation"><Link to="/work">Work</Link><Link to="/about">About</Link><Link to="/contact">Contact</Link></nav>
       <div className="nav-actions"><button data-magnetic className="mode-toggle" type="button" onClick={()=>setTheme(t=>t==='light'?'dark':'light')} aria-label={theme==='light'?'Activate illustrated night mode':'Activate photographic light mode'} title={theme==='light'?'Dark illustrated world':'Light photographic world'}>{theme==='light'?<Moon size={19}/>:<Sun size={19}/>}</button>
-      <button data-magnetic className="menu-toggle" onClick={()=>setMenu(v=>!v)} aria-label={menu?'Close menu':'Open menu'} aria-expanded={menu}>{menu?<X size={21}/>:<Menu size={21}/>}<span>{menu?'Close':'Menu'}</span></button></div>
+      <button data-magnetic type="button" className="menu-toggle" onClick={()=>setMenu(v=>!v)} aria-label={menu?'Close menu':'Open menu'} aria-expanded={menu}>{menu?<X size={21}/>:<Menu size={21}/>}<span>{menu?'Close':'Menu'}</span></button></div>
       </div>
     </header>
-    <div className={`fullscreen-menu ${menu?'fullscreen-menu-open':''}`} aria-hidden={!menu}>
+    <div className={`fullscreen-menu ${menu?'fullscreen-menu-open':''}`} role="dialog" aria-label="Site navigation" aria-modal={menu} aria-hidden={!menu}>
       <div className="fullscreen-inner"><span className="eyebrow">Navigation</span>
       <nav aria-label="Expanded navigation">{[['Home','/'],['Work','/work'],['About','/about'],['Contact','/contact']].map(([label,to],i)=><Link key={to} tabIndex={menu?0:-1} to={to} onClick={()=>setMenu(false)}><span>0{i+1}</span>{label}<ArrowUpRight size={30}/></Link>)}</nav>
       <div className="menu-bottom"><span>Design · Development · Interaction</span><span>Addis Ababa, Ethiopia</span></div></div>
     </div>
-    <div key={path} className="route-stage"><div className="route-curtain" aria-hidden="true"/>{page}<Footer/></div>
+    <div id="site-content" tabIndex={-1} key={path} className="route-stage"><div className="route-curtain" aria-hidden="true"/>{page}<Footer/></div>
   </>;
 }
 
@@ -92,6 +113,7 @@ function Home(){
     <div className="hero-photo light-scene" role="img" aria-label="Walking on a misty beach at sunset"/>
     <div className="hero-photo dark-scene" aria-hidden="true"/>
     <div className="hero-shade"/>
+    <HeroBirds/>
     <div className="hero-corner hero-corner-top"><span>Independent designer & developer</span><span>Based in Addis Ababa, Ethiopia</span></div>
     <div className="hero-side-label"><span>Interactive design<br/>& software development</span><ArrowDownRight size={27}/></div>
     <div className="hero-title-wrap"><h1 className="hero-title"><span>Yeshak Tsegaye</span><sup>®</sup></h1></div>
@@ -149,17 +171,25 @@ function Phone({src,label}:{src:string;label:string}){
 }
 function CaseVideo({p}:{p:Project}){
  const [quality,setQuality]=useState<'1080'|'4k'>('1080');const [available,setAvailable]=useState(false);
- useEffect(()=>{let cancelled=false;fetch(`/projects/${p.slug}/preview-4k.mp4`,{method:'HEAD'}).then(r=>{if(!cancelled)setAvailable(r.ok)}).catch(()=>{});return()=>{cancelled=true}},[p.slug]);
+ useEffect(()=>{let cancelled=false;fetch(`/projects/${p.slug}/preview-4k.mp4`,{method:'HEAD'}).then(r=>{const mime=r.headers.get('content-type')||'';if(!cancelled)setAvailable(r.ok && /^(video\/|application\/octet-stream)/i.test(mime))}).catch(()=>{});return()=>{cancelled=true}},[p.slug]);
  return <div className="case-player">
-  <video key={quality} src={`/projects/${p.slug}/${quality==='4k'?'preview-4k.mp4':'preview.mp4'}`} controls playsInline preload="metadata" poster={`/projects/${p.slug}/poster.jpg`} aria-label={`${p.name} video walkthrough`} onError={()=>setQuality('1080')}/>
+  <video key={quality} src={`/projects/${p.slug}/${quality==='4k'?'preview-4k.mp4':'preview.mp4'}`} controls playsInline preload="metadata" poster={`/projects/${p.slug}/poster.jpg`} aria-label={`${p.name} video walkthrough`} onError={()=>{if(quality==='4k'){setAvailable(false);setQuality('1080');}}}/>
   <div className="video-quality"><span>Design walkthrough</span><div><button className={quality==='1080'?'active':''} onClick={()=>setQuality('1080')}>Original 1080p</button>{available&&<button className={quality==='4k'?'active':''} onClick={()=>setQuality('4k')}>Upscaled 4K</button>}</div></div>
  </div>
 }
 function CaseStudy({project:p}:{project:Project}){
  const screenshots=frames[p.slug]||[];const [visible,setVisible]=useState(12);const [zoom,setZoom]=useState(-1);
+ const closeButton=useRef<HTMLButtonElement>(null);
+ const zoomOpen=zoom>=0;
+ useEffect(()=>{
+   if(!zoomOpen)return;
+   const lastFocus=document.activeElement as HTMLElement|null;
+   const raf=requestAnimationFrame(()=>closeButton.current?.focus({preventScroll:true}));
+   return()=>{cancelAnimationFrame(raf);lastFocus?.focus({preventScroll:true});};
+ },[zoomOpen]);
  const next=projects[(projects.indexOf(p)+1)%projects.length];
  useEffect(()=>{setVisible(12);setZoom(-1)},[p.slug]);
- useEffect(()=>{if(zoom<0)return;const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape')setZoom(-1);if(e.key==='ArrowRight')setZoom(v=>(v+1)%screenshots.length);if(e.key==='ArrowLeft')setZoom(v=>(v-1+screenshots.length)%screenshots.length);};window.addEventListener('keydown',onKey);document.body.style.overflow='hidden';return()=>{window.removeEventListener('keydown',onKey);document.body.style.overflow=''}},[zoom,screenshots.length]);
+ useEffect(()=>{if(zoom<0)return;const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape')setZoom(-1);if(e.key==='ArrowRight'){e.preventDefault();setZoom(v=>(v+1)%screenshots.length);}if(e.key==='ArrowLeft'){e.preventDefault();setZoom(v=>(v-1+screenshots.length)%screenshots.length);}if(e.key==='Tab'){const controls=[...document.querySelectorAll<HTMLButtonElement>('.lightbox button')];const current=controls.indexOf(document.activeElement as HTMLButtonElement);if(!e.shiftKey&&current===controls.length-1){e.preventDefault();controls[0]?.focus();}else if(e.shiftKey&&current===0){e.preventDefault();controls[controls.length-1]?.focus();}}};window.addEventListener('keydown',onKey);document.body.style.overflow='hidden';return()=>{window.removeEventListener('keydown',onKey);document.body.style.overflow=''}},[zoom,screenshots.length]);
  useEffect(()=>{if(!reduceMotion()){const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target)}}),{threshold:.05});document.querySelectorAll('[data-reveal]:not(.is-visible)').forEach(el=>observer.observe(el));return()=>observer.disconnect();}},[visible]);
  return <main className="inner-page case">
   <section className="case-heading wrap"><Link className="back-link" to="/work"><ArrowLeft size={18}/> All projects</Link><div data-reveal><span className="section-kicker">{p.kind} / {p.year}</span><h1>{p.name}<span>.</span></h1><p>{p.label}</p></div></section>
@@ -172,8 +202,8 @@ function CaseStudy({project:p}:{project:Project}){
     </article>)}</div>{visible<screenshots.length&&<button data-magnetic className="load-screens" onClick={()=>setVisible(v=>Math.min(v+12,screenshots.length))}>Load more screens <Plus size={19}/></button>}</section>
    <section className="next-project" data-reveal><span className="section-kicker">Up next</span><Link to={`/work/${next.slug}`}>{next.name}<ArrowUpRight size={50}/></Link></section>
   </div>
-  {zoom>=0&&<div className="lightbox" role="dialog" aria-modal="true" aria-label={`${p.name} full screen viewer`}>
-   <button className="lightbox-close" onClick={()=>setZoom(-1)} aria-label="Close screenshot"><X size={24}/></button>
+  {zoom>=0&&<div className="lightbox" role="dialog" aria-modal="true" aria-label={`${p.name} full screen viewer`} onMouseDown={event=>{if(event.target===event.currentTarget)setZoom(-1);}}>
+   <button ref={closeButton} className="lightbox-close" onClick={()=>setZoom(-1)} aria-label="Close screenshot"><X size={24}/></button>
    <button className="lightbox-prev" onClick={()=>setZoom(v=>(v-1+screenshots.length)%screenshots.length)} aria-label="Previous"><ChevronLeft/></button>
    <div className="lightbox-scroll"><img src={imageFor(p.slug,zoom+1)} alt={`${p.name} full screen ${zoom+1}`}/></div>
    <button className="lightbox-next" onClick={()=>setZoom(v=>(v+1)%screenshots.length)} aria-label="Next"><ChevronRight/></button>
