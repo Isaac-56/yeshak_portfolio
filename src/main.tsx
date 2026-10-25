@@ -184,52 +184,54 @@ function Works({featuredOnly=false,explorationsOnly=false}:{featuredOnly?:boolea
  {featuredOnly&&<div className="work-more"><Link data-magnetic to="/work">Explore every project <ArrowUpRight size={20}/></Link></div>}
  </section>}
 function AllWork(){return <main className="inner-page"><header className="page-header wrap" data-reveal><span className="section-kicker">Designs, studies & experiments — 2026</span><h1>Selected <em>work.</em></h1><p>Three favorite projects in motion, followed by four detailed interface explorations. Open any project for its complete screen gallery.</p></header><Works featuredOnly/><Works explorationsOnly/></main>}
-function Phone({src,label,width,height}:{src:string;label:string;width:number;height:number}){
+function Phone({src,label,width,height,variant='phone'}:{src:string;label:string;width:number;height:number;variant?:'phone'|'tablet'}){
  const pane=useRef<HTMLDivElement>(null);
- const animation=useRef<number>(0);
- const tall=height/width>2.72;
- // Tall exported pages are shown completely first. Visitors can switch to a device scroll
- // to read the details at a useful size. Nothing is cropped or stretched.
- const [view,setView]=useState<'full'|'scroll'>(tall?'full':'scroll');
- const stop=()=>{if(animation.current)cancelAnimationFrame(animation.current);animation.current=0};
- const beginScroll=()=>{
-   if(view!=='scroll'||reduceMotion()||!window.matchMedia('(hover:hover)').matches||!pane.current)return;
-   stop();const el=pane.current;const distance=el.scrollHeight-el.clientHeight;if(distance<30)return;
-   const start=el.scrollTop;const duration=Math.min(28000,Math.max(4800,(distance-start)*14));let startTime=0;
-   const tick=(time:number)=>{
-     if(!startTime)startTime=time;
-     const progress=Math.min((time-startTime)/duration,1);
-     const eased=progress<.5?2*progress*progress:1-Math.pow(-2*progress+2,2)/2;
-     el.scrollTop=start+(distance-start)*eased;
-     if(progress<1)animation.current=requestAnimationFrame(tick);
-   };
-   animation.current=requestAnimationFrame(tick);
- };
- useEffect(()=>stop,[]);
- const changeView=(next:'full'|'scroll')=>{stop();setView(next);if(pane.current)pane.current.scrollTop=0};
- return <div className={`screen-preview ${tall?'screen-preview-tall':'screen-preview-regular'}`}>
-  {tall&&<div className="screen-view-toggle" role="group" aria-label={`${label} preview mode`}>
-    <button type="button" className={view==='full'?'active':''} aria-pressed={view==='full'} onClick={()=>changeView('full')}>Full design</button>
-    <button type="button" className={view==='scroll'?'active':''} aria-pressed={view==='scroll'} onClick={()=>changeView('scroll')}>Scroll inside</button>
+ const pause=useRef(false);
+ const isLong=height/width>2.72;
+ const [view,setView]=useState<'full'|'scroll'>('scroll');
+ useEffect(()=>{
+   const el=pane.current;
+   if(!el||view==='full'||reduceMotion())return;
+   let visible=false,frame=0,last=0;
+   const io=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;},{threshold:.16});
+   io.observe(el);
+   function animate(time:number){
+     if(!el)return;
+     const delta=last?Math.min(70,time-last):0;
+     last=time;
+     const max=el.scrollHeight-el.clientHeight;
+     if(visible&&!pause.current&&max>18){
+       if(el.scrollTop>=max-2){el.scrollTop=0;}
+       else el.scrollTop=Math.min(max,el.scrollTop+((24+Math.min(max/140,25))*delta/1000));
+     }
+     frame=requestAnimationFrame(animate);
+   }
+   frame=requestAnimationFrame(animate);
+   return()=>{io.disconnect();cancelAnimationFrame(frame);};
+ },[src,view]);
+ const reset=()=>{if(pane.current)pane.current.scrollTop=0};
+ const changeView=(next:'full'|'scroll')=>{pause.current=false;setView(next);reset();};
+ return <div className={`screen-preview ${isLong?'screen-preview-tall':'screen-preview-regular'} screen-preview-${variant}`}>
+  {isLong&&<div className="screen-view-toggle" role="group" aria-label={`${label} preview mode`}>
+   <button type="button" className={view==='scroll'?'active':''} aria-pressed={view==='scroll'} onClick={()=>changeView('scroll')}>Scroll inside</button>
+   <button type="button" className={view==='full'?'active':''} aria-pressed={view==='full'} onClick={()=>changeView('full')}>Full design</button>
   </div>}
-  <div className={`device-frame ${tall?'device-frame-tall':''} ${view==='full'?'device-frame-full':''}`} onMouseEnter={beginScroll} onMouseLeave={stop}>
+  <div className={`device-frame device-frame-${variant} ${isLong?'device-frame-tall':''} ${view==='full'?'device-frame-full':''}`}
+   onMouseEnter={()=>{pause.current=true}}
+   onMouseLeave={()=>{reset();pause.current=false}}>
    <span className="device-camera" aria-hidden="true"/>
-   <div className="device-scroller" ref={pane} tabIndex={0} onWheel={stop} onTouchStart={stop} aria-label={view==='scroll'?`Scroll to explore ${label}`:`Full uncropped design of ${label}`}>
+   <div className="device-scroller" ref={pane} tabIndex={0}
+    onWheel={()=>{pause.current=true}} onTouchStart={()=>{pause.current=true}}
+    onFocus={()=>{pause.current=true}} onBlur={()=>{pause.current=false;reset()}}
+    aria-label={view==='scroll'?`Scroll to explore ${label}`:`Full uncropped design of ${label}`}>
     <img src={src} loading="lazy" alt={label} width={width} height={height}/>
    </div>
    <span className="device-homebar" aria-hidden="true"/>
   </div>
-  <div className="screen-preview-hint">{tall ? (view==='full'?'Entire source frame · No crop':'Scroll within the device'): 'Device-sized screen · Scroll if needed'}</div>
+  <div className="screen-preview-hint">{view==='full'?'Entire source image · No crop':variant==='tablet'?'Tablet view · Auto-scrolls · Hover to explore':'Auto-scrolls · Hover to pause · Scroll manually'}</div>
  </div>;
 }
-function CaseVideo({p}:{p:Project}){
- const [quality,setQuality]=useState<'1080'|'4k'>('1080');const [available,setAvailable]=useState(false);
- useEffect(()=>{let cancelled=false;fetch(`/projects/${p.slug}/preview-4k.mp4`,{method:'HEAD'}).then(r=>{const mime=r.headers.get('content-type')||'';if(!cancelled)setAvailable(r.ok && /^(video\/|application\/octet-stream)/i.test(mime))}).catch(()=>{});return()=>{cancelled=true}},[p.slug]);
- return <div className="case-player">
-  <video key={quality} src={`/projects/${p.slug}/${quality==='4k'?'preview-4k.mp4':'preview.mp4'}`} controls playsInline preload="metadata" poster={`/projects/${p.slug}/poster.jpg`} aria-label={`${p.name} video walkthrough`} onError={()=>{if(quality==='4k'){setAvailable(false);setQuality('1080');}}}/>
-  <div className="video-quality"><span>Design walkthrough</span><div><button className={quality==='1080'?'active':''} onClick={()=>setQuality('1080')}>Original 1080p</button>{available&&<button className={quality==='4k'?'active':''} onClick={()=>setQuality('4k')}>Upscaled 4K</button>}</div></div>
- </div>
-}
+
 function CaseStudy({project:p}:{project:Project}){
  const screenshots=frames[p.slug]||[];const [visible,setVisible]=useState(12);const [zoom,setZoom]=useState(-1);
  const closeButton=useRef<HTMLButtonElement>(null);
@@ -250,8 +252,8 @@ function CaseStudy({project:p}:{project:Project}){
   <div className="case-body wrap">
    <section className="case-overview" data-reveal><span className="section-kicker">01 / About the project</span><h2>{p.overview}</h2></section>
    <section className="case-facts" data-reveal><div><span className="section-kicker">The challenge</span><p>{p.challenge}</p></div><div><span className="section-kicker">The approach</span><p>{p.solution}</p></div></section>
-   <section className="screen-gallery"><div className="section-head" data-reveal><span className="section-kicker">02 / Design exploration</span><span>{screenshots.length} original frames · Full layouts and true-size scroll previews</span></div><div className="screen-grid">{screenshots.slice(0,visible).map((s,i)=><article className="screen-card" data-reveal key={s.image}>
-     <div className={`screen-art ${s.height/s.width>2.72?'screen-art-long':''}`}><Phone src={imageFor(p.slug,i+1)} label={`${p.name} screen ${i+1}`} width={s.width} height={s.height}/></div><div className="screen-details"><span>{String(i+1).padStart(2,'0')} / {String(screenshots.length).padStart(2,'0')}</span><button aria-label={`Expand ${p.name} screen ${i+1}`} onClick={()=>setZoom(i)}>Open full screen <ArrowUpRight size={16}/></button></div>
+   <section className="screen-gallery"><div className="section-head" data-reveal><span className="section-kicker">02 / Design exploration</span><span>{screenshots.length} original frames · Smooth auto-scroll · Hover to pause · Full image available</span></div><div className={`screen-grid ${p.slug==='sarabi'?'screen-grid-tablet':''}`}>{screenshots.slice(0,visible).map((s,i)=><article className="screen-card" data-reveal key={s.image}>
+     <div className={`screen-art ${s.height/s.width>2.72?'screen-art-long':''}`}><Phone src={imageFor(p.slug,i+1)} label={`${p.name} screen ${i+1}`} width={s.width} height={s.height} variant={p.slug==='sarabi'?'tablet':'phone'}/></div><div className="screen-details"><span>{String(i+1).padStart(2,'0')} / {String(screenshots.length).padStart(2,'0')}</span><button aria-label={`Expand ${p.name} screen ${i+1}`} onClick={()=>setZoom(i)}>Open full screen <ArrowUpRight size={16}/></button></div>
     </article>)}</div>{visible<screenshots.length&&<button data-magnetic className="load-screens" onClick={()=>setVisible(v=>Math.min(v+12,screenshots.length))}>Load more screens <Plus size={19}/></button>}</section>
    <section className="next-project" data-reveal><span className="section-kicker">Up next</span><Link to={`/work/${next.slug}`}>{next.name}<ArrowUpRight size={50}/></Link></section>
   </div>
