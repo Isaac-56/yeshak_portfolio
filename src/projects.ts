@@ -8,4 +8,4 @@ export const projects:Project[]=[
 {slug:'blog-app',name:'Blog App',label:'Reading & discovery',kind:'Editorial · Mobile UI',year:'2026',accent:'#eee4d7',overview:'A content-led editorial interface exploration for discovering, reading and engaging with stories.',challenge:'Keeping the experience expressive without compromising reading comfort.',solution:'Editorial hierarchy, typography-driven presentation and intentional use of whitespace.'},
 {slug:'sarabi',name:'Sarabi Restaurant',label:'Restaurant web experience',kind:'Hospitality · Responsive Design',year:'2026',accent:'#e9d9cb',overview:'A hospitality-focused visual experience highlighting offerings and a rich restaurant identity.',challenge:'Presenting long-form content without losing visual impact.',solution:'An expressive composition with carefully considered sections and full-length layouts.'}
 ];
-export const imageFor=(slug:string,n:number)=>`/projects/${slug}/${String(n).padStart(2,'0')}.webp`;
+export const imageFor=(slug:string,n:number)=>slug==='sarabi'&&n===1?'/projects/sarabi/tablet-preview.webp':`/projects/${slug}/${String(n).padStart(2,'0')}.webp`;
