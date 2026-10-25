@@ -271,7 +271,7 @@ function CaseStudy({project:p}:{project:Project}){
  useEffect(()=>{if(!reduceMotion()){const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');observer.unobserve(entry.target)}}),{threshold:.05});document.querySelectorAll('[data-reveal]:not(.is-visible)').forEach(el=>observer.observe(el));return()=>observer.disconnect();}},[visible]);
  return <main className="inner-page case">
   <section className="case-heading wrap"><Link className="back-link" to="/work"><ArrowLeft size={18}/> All projects</Link><div data-reveal><span className="section-kicker">{p.kind} / {p.year}</span><h1>{p.name}<span>.</span></h1><p>{p.label}</p></div></section>
-  <div className="case-feature" style={{background:p.accent}}>{p.video?<CaseVideo p={p}/>:<img src={imageFor(p.slug,1)} alt={`${p.name} project preview`}/>}<span className="feature-label">Project showcase · {p.year}</span></div>
+  <div className="case-feature" style={{background:p.accent}}>{p.video?<CaseVideo p={p}/>:p.slug==='sarabi'?<div className="case-feature-tablet"><Phone src={imageFor(p.slug,1)} width={672} height={2048} label="Sarabi restaurant tablet design" variant="tablet"/></div>:<img src={imageFor(p.slug,1)} alt={`${p.name} project preview`}/>}<span className="feature-label">Project showcase · {p.year}</span></div>
   <div className="case-body wrap">
    <section className="case-overview" data-reveal><span className="section-kicker">01 / About the project</span><h2>{p.overview}</h2></section>
    <section className="case-facts" data-reveal><div><span className="section-kicker">The challenge</span><p>{p.challenge}</p></div><div><span className="section-kicker">The approach</span><p>{p.solution}</p></div></section>
