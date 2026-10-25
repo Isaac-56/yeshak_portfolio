@@ -4,6 +4,7 @@ import {BrowserRouter, Link, useLocation} from 'react-router-dom';
 import {ArrowDownRight, ArrowRight, ArrowUpRight, ArrowLeft, Sun, Moon, Menu, X, ChevronLeft, ChevronRight, Play, Plus, Minus} from 'lucide-react';
 import {projects, imageFor, type Project} from './projects';
 import manifest from '../public/projects/manifest.json';
+import ContactPage from './components/ContactPage';
 import './style.css';
 
 type Theme = 'light'|'dark';
@@ -186,7 +187,7 @@ function About(){return <main className="inner-page about-page">
   <section className="about-services wrap"><div className="section-head" data-reveal><span className="section-kicker">What I bring to projects</span><span>01 — 03</span></div>{[['01','Research & thinking','Asking better questions, understanding the user and framing the right problem.'],['02','Visual & interaction design','Composing expressive, usable interfaces with purposeful interactions and a strong eye for detail.'],['03','Creative development','Bringing designs to life with responsive code, refined transitions and thoughtful performance.']].map(([n,t,d])=><div className="service-row" data-reveal key={n}><span>{n}</span><h3>{t}</h3><p>{d}</p><ArrowUpRight size={25}/></div>)}</section>
   <section className="about-ending wrap" data-reveal><span className="section-kicker">A little of everything</span><h2>Design. Code.<br/><em>Keep exploring.</em></h2></section>
  </main>}
-function Contact(){return <main className="inner-page contact-page"><header className="page-header wrap" data-reveal><span className="section-kicker">Available for collaboration</span><h1>Let's make<br/><em>something good.</em></h1><p>Have an idea, project or collaboration in mind? I'd love to hear about it.</p></header><section className="contact-links wrap" data-reveal><a href="mailto:yeshak34@gmail.com"><span>Drop me an email</span><strong>yeshak34@gmail.com</strong><ArrowUpRight/></a><a href="https://github.com/Isaac-56" target="_blank" rel="noreferrer"><span>Find me on</span><strong>GitHub</strong><ArrowUpRight/></a><a href="https://www.linkedin.com/in/yeshak-tsegaye-899493384/" target="_blank" rel="noreferrer"><span>Connect on</span><strong>LinkedIn</strong><ArrowUpRight/></a></section></main>}
+function Contact(){return <ContactPage/>;}
 function NotFound(){return <main className="inner-page wrap error-page"><span className="section-kicker">404 / Not found</span><h1>Wrong turn.</h1><Link to="/">Back to home <ArrowUpRight size={18}/></Link></main>}
 function Footer(){return <footer className="footer"><div className="wrap"><div className="footer-top"><span className="section-kicker">Have a project in mind?</span><Link data-magnetic to="/contact">Let's work together <ArrowUpRight size={55}/></Link></div><div className="footer-bottom"><span>© {new Date().getFullYear()} Yeshak Tsegaye</span><span>Addis Ababa, Ethiopia</span><div><a href="https://github.com/Isaac-56" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://www.linkedin.com/in/yeshak-tsegaye-899493384/" target="_blank" rel="noreferrer">LinkedIn ↗</a></div><button onClick={()=>window.scrollTo({top:0,behavior:'smooth'})}>Back to top ↑</button></div></div></footer>}
 createRoot(document.getElementById('root')!).render(<React.StrictMode><BrowserRouter><App/></BrowserRouter></React.StrictMode>);
