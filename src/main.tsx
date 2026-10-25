@@ -134,8 +134,8 @@ function PreviewVideo({p,controls=false}:{p:Project;controls?:boolean}){
   return <video ref={ref} src={`/projects/${p.slug}/preview.mp4`} muted={!controls} loop={!controls} playsInline preload="metadata" poster={`/projects/${p.slug}/poster.jpg`} controls={controls} aria-label={`${p.name} interface animation`}/>;
 }
 function CoverDevices({p}:{p:Project}){
- const main=p.slug==='blog-app'?10:p.slug==='directed'?3:p.slug==='medical-app'?3:p.slug==='sarabi'?1:2;
- const second=p.slug==='blog-app'?2:p.slug==='directed'?2:p.slug==='medical-app'?14:p.slug==='sarabi'?2:5;
+ const covers:Record<string,[number,number]>={'medical-app':[1,2],'directed':[3,2],'blog-app':[10,2],'sarabi':[1,13]};
+ const [main,second]=covers[p.slug]??[2,1];
  return <div className={`cover-devices ${p.slug==='sarabi'?'cover-devices-browser':''}`} aria-hidden="true">
   {p.slug==='sarabi'? <div className="cover-browser"><div className="browser-top"><i/><i/><i/><span>sarabi.restaurant</span></div><div className="browser-viewport"><img src={imageFor(p.slug,main)} loading="lazy" alt=""/></div></div>:null}
   <div className="cover-device cover-device-back"><div className="cover-bezel"><div className="cover-screen"><img src={imageFor(p.slug,second)} loading="lazy" alt=""/></div></div></div>
@@ -155,18 +155,42 @@ function Works({featuredOnly=false,explorationsOnly=false}:{featuredOnly?:boolea
  {featuredOnly&&<div className="work-more"><Link data-magnetic to="/work">Explore every project <ArrowUpRight size={20}/></Link></div>}
  </section>}
 function AllWork(){return <main className="inner-page"><header className="page-header wrap" data-reveal><span className="section-kicker">Designs, studies & experiments — 2026</span><h1>Selected <em>work.</em></h1><p>Three favorite projects in motion, followed by four detailed interface explorations. Open any project for its complete screen gallery.</p></header><Works featuredOnly/><Works explorationsOnly/></main>}
-function Phone({src,label}:{src:string;label:string}){
- const pane=useRef<HTMLDivElement>(null);const animation=useRef<number>(0);
+function Phone({src,label,width,height}:{src:string;label:string;width:number;height:number}){
+ const pane=useRef<HTMLDivElement>(null);
+ const animation=useRef<number>(0);
+ const tall=height/width>2.72;
+ // Tall exported pages are shown completely first. Visitors can switch to a device scroll
+ // to read the details at a useful size. Nothing is cropped or stretched.
+ const [view,setView]=useState<'full'|'scroll'>(tall?'full':'scroll');
  const stop=()=>{if(animation.current)cancelAnimationFrame(animation.current);animation.current=0};
- const begin=()=>{
-   if(reduceMotion()||!window.matchMedia('(hover:hover)').matches||!pane.current)return;
+ const beginScroll=()=>{
+   if(view!=='scroll'||reduceMotion()||!window.matchMedia('(hover:hover)').matches||!pane.current)return;
    stop();const el=pane.current;const distance=el.scrollHeight-el.clientHeight;if(distance<30)return;
-   const start=el.scrollTop;const to=distance;const duration=Math.min(22000,Math.max(4500,(to-start)*12));let t0=0;
-   const tick=(t:number)=>{if(!t0)t0=t;const progress=Math.min((t-t0)/duration,1);const eased=progress<.5?2*progress*progress:1-Math.pow(-2*progress+2,2)/2;el.scrollTop=start+(to-start)*eased;if(progress<1)animation.current=requestAnimationFrame(tick)};animation.current=requestAnimationFrame(tick);
+   const start=el.scrollTop;const duration=Math.min(28000,Math.max(4800,(distance-start)*14));let startTime=0;
+   const tick=(time:number)=>{
+     if(!startTime)startTime=time;
+     const progress=Math.min((time-startTime)/duration,1);
+     const eased=progress<.5?2*progress*progress:1-Math.pow(-2*progress+2,2)/2;
+     el.scrollTop=start+(distance-start)*eased;
+     if(progress<1)animation.current=requestAnimationFrame(tick);
+   };
+   animation.current=requestAnimationFrame(tick);
  };
  useEffect(()=>stop,[]);
- return <div className="device-frame" onMouseEnter={begin} onMouseLeave={stop}>
-  <span className="device-camera" aria-hidden="true"/><div className="device-scroller" ref={pane} tabIndex={0} onWheel={stop} onTouchStart={stop} aria-label={`Scroll to explore ${label}`}><img src={src} loading="lazy" alt={label}/></div><span className="device-homebar" aria-hidden="true"/>
+ const changeView=(next:'full'|'scroll')=>{stop();setView(next);if(pane.current)pane.current.scrollTop=0};
+ return <div className={`screen-preview ${tall?'screen-preview-tall':'screen-preview-regular'}`}>
+  {tall&&<div className="screen-view-toggle" role="group" aria-label={`${label} preview mode`}>
+    <button type="button" className={view==='full'?'active':''} aria-pressed={view==='full'} onClick={()=>changeView('full')}>Full design</button>
+    <button type="button" className={view==='scroll'?'active':''} aria-pressed={view==='scroll'} onClick={()=>changeView('scroll')}>Scroll inside</button>
+  </div>}
+  <div className={`device-frame ${tall?'device-frame-tall':''} ${view==='full'?'device-frame-full':''}`} onMouseEnter={beginScroll} onMouseLeave={stop}>
+   <span className="device-camera" aria-hidden="true"/>
+   <div className="device-scroller" ref={pane} tabIndex={0} onWheel={stop} onTouchStart={stop} aria-label={view==='scroll'?`Scroll to explore ${label}`:`Full uncropped design of ${label}`}>
+    <img src={src} loading="lazy" alt={label} width={width} height={height}/>
+   </div>
+   <span className="device-homebar" aria-hidden="true"/>
+  </div>
+  <div className="screen-preview-hint">{tall ? (view==='full'?'Entire source frame · No crop':'Scroll within the device'): 'Device-sized screen · Scroll if needed'}</div>
  </div>;
 }
 function CaseVideo({p}:{p:Project}){
@@ -197,8 +221,8 @@ function CaseStudy({project:p}:{project:Project}){
   <div className="case-body wrap">
    <section className="case-overview" data-reveal><span className="section-kicker">01 / About the project</span><h2>{p.overview}</h2></section>
    <section className="case-facts" data-reveal><div><span className="section-kicker">The challenge</span><p>{p.challenge}</p></div><div><span className="section-kicker">The approach</span><p>{p.solution}</p></div></section>
-   <section className="screen-gallery"><div className="section-head" data-reveal><span className="section-kicker">02 / Design exploration</span><span>{screenshots.length} individual frames · Scroll within the phone</span></div><div className="screen-grid">{screenshots.slice(0,visible).map((s,i)=><article className="screen-card" data-reveal key={s.image}>
-     <div className="screen-art"><Phone src={imageFor(p.slug,i+1)} label={`${p.name} screen ${i+1}`}/></div><div className="screen-details"><span>{String(i+1).padStart(2,'0')} / {String(screenshots.length).padStart(2,'0')}</span><button aria-label={`Expand ${p.name} screen ${i+1}`} onClick={()=>setZoom(i)}>Open full screen <ArrowUpRight size={16}/></button></div>
+   <section className="screen-gallery"><div className="section-head" data-reveal><span className="section-kicker">02 / Design exploration</span><span>{screenshots.length} original frames · Full layouts and true-size scroll previews</span></div><div className="screen-grid">{screenshots.slice(0,visible).map((s,i)=><article className="screen-card" data-reveal key={s.image}>
+     <div className={`screen-art ${s.height/s.width>2.72?'screen-art-long':''}`}><Phone src={imageFor(p.slug,i+1)} label={`${p.name} screen ${i+1}`} width={s.width} height={s.height}/></div><div className="screen-details"><span>{String(i+1).padStart(2,'0')} / {String(screenshots.length).padStart(2,'0')}</span><button aria-label={`Expand ${p.name} screen ${i+1}`} onClick={()=>setZoom(i)}>Open full screen <ArrowUpRight size={16}/></button></div>
     </article>)}</div>{visible<screenshots.length&&<button data-magnetic className="load-screens" onClick={()=>setVisible(v=>Math.min(v+12,screenshots.length))}>Load more screens <Plus size={19}/></button>}</section>
    <section className="next-project" data-reveal><span className="section-kicker">Up next</span><Link to={`/work/${next.slug}`}>{next.name}<ArrowUpRight size={50}/></Link></section>
   </div>
