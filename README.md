@@ -26,6 +26,3 @@ Both homepage backgrounds are derived from the same 1536×1024 photograph so the
 ## Publishing
 
 The project is provided as a separate code package for review. It is not publicly deployed, and no changes to GitHub `main` are made.
-
-## GitHub transfer status
-Source code is committed on the V3 review branch. Large screenshot and video assets are added separately and may be unavailable until asset transfer is complete. The original 1080p video sources are not native 4K; optional versions are upscaled.

@@ -2,7 +2,3 @@ node_modules/
 dist/
 .env
 *.log
-
-# Restored from tracked 4K chunks on first dev/build
-public/projects/*/preview-4k.mp4
-public/projects/*/*.assembling
