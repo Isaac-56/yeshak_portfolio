@@ -261,3 +261,40 @@
  .page-transition-overlay{display:none!important}
  .page-transition-center span:last-child{animation:none!important}
 }
+
+/* V5: long-page previews start animated, stop on hover, reset when exiting.
+   Use a true tablet viewport for responsive restaurant pages. */
+.screen-grid-tablet{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px}
+.screen-grid-tablet .screen-art{height:535px}
+.screen-preview-tablet{gap:14px}
+.screen-preview-tablet .device-frame-tablet:not(.device-frame-full){
+  aspect-ratio:4 / 3;width:min(100%,650px);height:auto;
+  max-height:min(385px,calc(100% - 55px));
+  background:#202028;border-radius:clamp(22px,2.8vw,37px);
+  padding:0;box-shadow:0 22px 55px #0003,0 0 0 2px #ffffff2c inset;
+}
+.screen-preview-tablet .device-frame-tablet:not(.device-frame-full) .device-scroller{
+  inset:17px 17px 19px;position:absolute;width:auto;height:auto;
+  border-radius:clamp(11px,1.5vw,22px);overflow-x:hidden;overflow-y:auto;background:white;
+}
+.screen-preview-tablet .device-camera{top:6px;left:50%;width:4px;height:4px;background:#9ea2aa;border-radius:50%}
+.screen-preview-tablet .device-homebar{display:none}
+.screen-preview-tablet .device-frame-full{width:min(100%,610px);height:calc(100% - 98px)}
+.screen-preview .device-scroller{scroll-behavior:auto;overscroll-behavior:contain;touch-action:pan-y}
+.screen-preview .device-scroller img{user-select:none;-webkit-user-drag:none}
+.screen-preview .screen-view-toggle{order:0}
+.screen-preview .device-frame{order:1}
+.screen-preview .screen-preview-hint{order:2;max-width:100%;line-height:1.45}
+.screen-grid-tablet .screen-card{min-width:0}
+@media(max-width:900px){
+ .screen-grid-tablet{grid-template-columns:1fr;gap:28px}
+ .screen-grid-tablet .screen-art{height:520px}
+ .screen-preview-tablet .device-frame-tablet:not(.device-frame-full){width:min(100%,620px);max-height:365px}
+}
+@media(max-width:720px){
+ .screen-grid-tablet .screen-art{height:440px}
+ .screen-preview-tablet .device-frame-tablet:not(.device-frame-full){max-height:300px;border-radius:24px}
+ .screen-preview-tablet .device-frame-tablet:not(.device-frame-full) .device-scroller{inset:12px;border-radius:13px}
+ .screen-preview-hint{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){.screen-preview .device-scroller{scroll-behavior:auto!important}}
