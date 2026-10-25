@@ -192,7 +192,7 @@ function Phone({src,label,width,height,variant='phone'}:{src:string;label:string
  useEffect(()=>{
    const el=pane.current;
    if(!el||view==='full'||reduceMotion())return;
-   let visible=false,frame=0,last=0;
+   let visible=false,frame=0,last=0,position=el.scrollTop;
    const io=new IntersectionObserver(entries=>{visible=!!entries[0]?.isIntersecting;},{threshold:.16});
    io.observe(el);
    function animate(time:number){
@@ -200,9 +200,12 @@ function Phone({src,label,width,height,variant='phone'}:{src:string;label:string
      const delta=last?Math.min(70,time-last):0;
      last=time;
      const max=el.scrollHeight-el.clientHeight;
+     // Keep subpixel progress in a floating-point accumulator.
+     // Browsers round el.scrollTop; adding <1px per frame otherwise stalls.
+     if(pause.current||!visible||Math.abs(el.scrollTop-position)>2)position=el.scrollTop;
      if(visible&&!pause.current&&max>18){
-       if(el.scrollTop>=max-2){el.scrollTop=0;}
-       else el.scrollTop=Math.min(max,el.scrollTop+((24+Math.min(max/140,25))*delta/1000));
+       position=position>=max-2?0:Math.min(max,position+(24+Math.min(max/140,25))*delta/1000);
+       el.scrollTop=position;
      }
      frame=requestAnimationFrame(animate);
    }
