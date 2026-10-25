@@ -232,6 +232,29 @@ function Phone({src,label,width,height,variant='phone'}:{src:string;label:string
  </div>;
 }
 
+function CaseVideo({p}:{p:Project}){
+ const [quality,setQuality]=useState<'1080'|'4k'>('1080');
+ const [available,setAvailable]=useState(false);
+ useEffect(()=>{
+   let cancelled=false;
+   fetch(`/projects/${p.slug}/preview-4k.mp4`,{method:'HEAD'}).then(r=>{
+     const mime=r.headers.get('content-type')||'';
+     if(!cancelled)setAvailable(r.ok&&/^(video\/|application\/octet-stream)/i.test(mime));
+   }).catch(()=>{if(!cancelled)setAvailable(false)});
+   return()=>{cancelled=true};
+ },[p.slug]);
+ return <div className="case-player">
+   <video key={quality} src={`/projects/${p.slug}/${quality==='4k'?'preview-4k.mp4':'preview.mp4'}`}
+    controls playsInline preload="metadata" poster={`/projects/${p.slug}/poster.jpg`}
+    aria-label={`${p.name} video walkthrough`}
+    onError={()=>{if(quality==='4k'){setAvailable(false);setQuality('1080');}}}/>
+   <div className="video-quality"><span>Design walkthrough</span><div>
+     <button type="button" className={quality==='1080'?'active':''} onClick={()=>setQuality('1080')}>Original 1080p</button>
+     {available&&<button type="button" className={quality==='4k'?'active':''} onClick={()=>setQuality('4k')}>Upscaled 4K</button>}
+   </div></div>
+ </div>;
+}
+
 function CaseStudy({project:p}:{project:Project}){
  const screenshots=frames[p.slug]||[];const [visible,setVisible]=useState(12);const [zoom,setZoom]=useState(-1);
  const closeButton=useRef<HTMLButtonElement>(null);
