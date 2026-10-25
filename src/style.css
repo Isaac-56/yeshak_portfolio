@@ -298,3 +298,16 @@
  .screen-preview-hint{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.screen-preview .device-scroller{scroll-behavior:auto!important}}
+
+/* Case-study hero: Sarabi receives a real 4:3 tablet, not a tall floating phone screenshot. */
+.case-feature-tablet{width:min(84%,760px);height:100%;display:flex;justify-content:center;align-items:center;padding:30px 0}
+.case-feature-tablet .screen-preview{height:100%;gap:8px}
+.case-feature-tablet .device-frame-tablet:not(.device-frame-full){max-height:min(470px,calc(100% - 80px));width:min(100%,720px)}
+.case-feature-tablet .device-frame-full{height:calc(100% - 80px)}
+.case-feature-tablet .screen-view-toggle{background:var(--panel)}
+@media(max-width:720px){
+ .case-feature-tablet{width:96%;padding:10px 0}
+ .case-feature-tablet .device-frame-tablet:not(.device-frame-full){max-height:220px}
+ .case-feature-tablet .screen-preview-hint{display:none}
+ .case-feature-tablet .screen-view-toggle button{padding:6px 9px;font-size:10px}
+}
