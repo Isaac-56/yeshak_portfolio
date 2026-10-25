@@ -141,6 +141,14 @@ test('Sarabi uses tablet presentation and automatically scrolls until hovered',a
   await scroller.scrollIntoViewIfNeeded();
   await expect(scroller.locator('img')).toBeVisible();
   await page.waitForTimeout(1800);
+  const diagnostics=await scroller.evaluate(el=>{
+    const img=el.querySelector('img');
+    return { scrollTop:el.scrollTop,scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,
+      width:el.clientWidth,imgNatural:img?.naturalHeight,imgWidth:img?.naturalWidth,
+      imgRenderedHeight:img?.getBoundingClientRect().height,
+      hovered:el.matches(':hover'),focused:el.matches(':focus'),style:getComputedStyle(el).overflowY };
+  });
+  console.log('SARABI_SCROLL_DIAGNOSTIC',JSON.stringify(diagnostics));
   const before=await scroller.evaluate(el=>el.scrollTop);
   expect(before).toBeGreaterThan(10);
   await scroller.hover();
