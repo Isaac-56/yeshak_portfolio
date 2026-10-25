@@ -3,7 +3,7 @@ import {createRoot} from 'react-dom/client';
 import {BrowserRouter, Link, useLocation} from 'react-router-dom';
 import {ArrowDownRight, ArrowRight, ArrowUpRight, ArrowLeft, Sun, Moon, Menu, X, ChevronLeft, ChevronRight, Play, Plus, Minus} from 'lucide-react';
 import {projects, imageFor, type Project} from './projects';
-import manifest from '../public/projects/manifest.json';
+import manifest from './screen-manifest.json';
 import ContactPage from './components/ContactPage';
 import HeroBirds from './components/HeroBirds';
 import './style.css';
