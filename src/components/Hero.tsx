@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ArrowDownRight,ArrowUpRight } from 'lucide-react';
-import portrait from '../assets/1.png';
 export default function Hero(){return <main>
  <section className="ds-hero">
   <div className="ds-hero-top section-padding"><div className="max-w-[1400px] mx-auto ds-hero-top-inner"><span>Independent designer & developer</span><span>Based in Addis Ababa, Ethiopia</span></div></div>
-  <div className="ds-hero-image"><img src={portrait} alt="Yeshak Tsegaye" /><div className="ds-hero-vignette"/>
+  <div className="ds-hero-image"><img className="ds-hero-photo ds-hero-photo-light" src="/images/hero-light.webp" alt="A cinematic solitary walk by the coast at sunset" /><img className="ds-hero-photo ds-hero-photo-dark" src="/images/hero-dark.webp" alt="" aria-hidden="true" /><div className="ds-hero-vignette"/>
    <h1>Yeshak Tsegaye<span>®</span></h1>
    <div className="ds-hero-location"><span>Located in<br/>Addis Ababa, ET</span><span className="ds-hero-globe">✺</span></div>
    <div className="ds-hero-job">UI/UX Designer<br/>& Developer <ArrowDownRight size={29}/></div>
