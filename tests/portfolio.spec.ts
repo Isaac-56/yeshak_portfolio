@@ -68,13 +68,13 @@ for (const slug of projects) {
 test('contact form preserves fields, validates required values, and reports successful EmailJS response', async ({page}) => {
   await page.goto('/contact');
   await expect(page.getByLabel('Name')).toBeVisible();
-  await expect(page.getByLabel('Email', {exact:true})).toBeVisible();
+  await expect(page.getByLabel('Email')).toBeVisible();
   await expect(page.getByLabel('Subject')).toBeVisible();
   await expect(page.getByLabel('Message')).toBeVisible();
   await page.getByRole('button',{name:/Send message/}).click();
   await expect(page.locator('.contact-success')).toHaveCount(0);
   await page.getByLabel('Name').fill('Preview tester');
-  await page.getByLabel('Email',{exact:true}).fill('preview@example.com');
+  await page.getByLabel('Email').fill('preview@example.com');
   await page.getByLabel('Subject').fill('Preview test');
   await page.getByLabel('Message').fill('This is a simulated test, not a real email.');
   await page.route('**/api.emailjs.com/**',route=>route.fulfill({
