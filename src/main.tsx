@@ -1,6 +1,6 @@
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {BrowserRouter, Link, useLocation} from 'react-router-dom';
+import {BrowserRouter, Link, useLocation, useNavigate} from 'react-router-dom';
 import {ArrowDownRight, ArrowRight, ArrowUpRight, ArrowLeft, Sun, Moon, Menu, X, ChevronLeft, ChevronRight, Play, Plus, Minus} from 'lucide-react';
 import {projects, imageFor, type Project} from './projects';
 import manifest from './screen-manifest.json';
@@ -51,6 +51,31 @@ function App(){
   const [theme,setTheme]=useState<Theme>(()=>{try {return localStorage.getItem('yt-theme-final')==='dark'?'dark':'light';}catch{return'light'}});
   const [menu,setMenu]=useState(false);
   const [loader,setLoader]=useState(!reduceMotion());
+  const navigate=useNavigate();
+  const [pageTransition,setPageTransition]=useState<{phase:'cover'|'hold'|'uncover';label:string}|null>(null);
+  const navigationTimers=useRef<number[]>([]);
+  const transitionBusy=useRef(false);
+  useEffect(()=>()=>navigationTimers.current.forEach(clearTimeout),[]);
+  function handleLinkNavigation(event:React.MouseEvent<HTMLDivElement>){
+    if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.altKey||event.shiftKey||transitionBusy.current)return;
+    const anchor=(event.target as Element).closest?.('a[href]') as HTMLAnchorElement|null;
+    if(!anchor||anchor.hasAttribute('download')||anchor.target==='_blank')return;
+    const href=anchor.getAttribute('href')||'';
+    if(!href.startsWith('/')||href.startsWith('//')||href===path)return;
+    const nextPath=href.split(/[?#]/)[0];
+    if(nextPath===path&&href.indexOf('#')!==-1)return;
+    event.preventDefault();
+    if(reduceMotion()){navigate(href);return;}
+    transitionBusy.current=true;
+    const label=nextPath==='/about'?'About':nextPath==='/contact'?'Contact':nextPath==='/work'?'Work':nextPath==='/'?'Home':projects.find(p=>nextPath===`/work/${p.slug}`)?.name||'Explore';
+    setMenu(false);
+    setPageTransition({phase:'cover',label});
+    navigationTimers.current=[
+      window.setTimeout(()=>{navigate(href);setPageTransition({phase:'hold',label});},620),
+      window.setTimeout(()=>setPageTransition({phase:'uncover',label}),860),
+      window.setTimeout(()=>{setPageTransition(null);transitionBusy.current=false;document.getElementById('site-content')?.focus({preventScroll:true});},1580)
+    ];
+  }
   const location=useLocation();const path=location.pathname;
   useScrollReveal(path);useMagnetic(path);
   useLayoutEffect(()=>{window.scrollTo(0,0);setMenu(false);},[path]);
@@ -85,7 +110,11 @@ function App(){
   else if(path==='/contact')page=<Contact/>;
   else if(path==='/')page=<Home/>;
   else page=<NotFound/>;
-  return <>
+  return <div className="app-root" onClickCapture={handleLinkNavigation}>
+    {pageTransition&&<div className={`page-transition-overlay page-transition-${pageTransition.phase}`} role="status" aria-live="polite" aria-label={`Opening ${pageTransition.label}`}>
+      <div className="page-transition-center"><span className="page-transition-dot">●</span><span key={pageTransition.label}>{pageTransition.label}</span></div>
+      <span className="page-transition-signature">© Code by Yeshak</span>
+    </div>}
     <div className={`preloader ${loader?'preloader-active':'preloader-finished'}`} aria-hidden="true"><span>Yeshak<span className="period">.</span></span><div className="preloader-bar"/></div>
     <Cursor/>
     <a className="skip-to-content" href="#site-content">Skip to content</a>
@@ -102,7 +131,7 @@ function App(){
       <div className="menu-bottom"><span>Design · Development · Interaction</span><span>Addis Ababa, Ethiopia</span></div></div>
     </div>
     <div id="site-content" tabIndex={-1} key={path} className="route-stage"><div className="route-curtain" aria-hidden="true"/>{page}<Footer/></div>
-  </>;
+  </div>;
 }
 
 function Home(){
