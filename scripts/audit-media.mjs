@@ -20,6 +20,7 @@ for(const slug of expected){
 }
 for(const file of [
  'public/images/hero-light.webp','public/images/hero-dark.webp','public/images/hero-dark-4k.webp',
+ 'public/projects/sarabi/tablet-preview.webp',
  'public/images/about-portrait.webp',
  ...expected.slice(0,3).flatMap(slug=>[`public/projects/${slug}/preview.mp4`,`public/projects/${slug}/poster.jpg`])
 ]){
