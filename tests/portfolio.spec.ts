@@ -237,3 +237,42 @@ test('full Yeshak Tsegaye hero heading never clips off either viewport edge',asy
    expect(result.scrollWidth,`Horizontal overflow at ${viewport.width}`).toBeLessThanOrEqual(result.viewport+2);
  }
 });
+
+test('flowing water animation visibly changes frames but never paints over the portrait',async ({page})=>{
+  await page.goto('/');
+  const water=page.locator('canvas.living-hero-water-canvas');
+  await expect(water).toBeVisible();
+  await expect(water).toHaveAttribute('data-running','true',{timeout:10000});
+  const measure=()=>water.evaluate((node)=>{
+    const canvas=node as HTMLCanvasElement;
+    const ctx=canvas.getContext('2d');
+    if(!ctx)return {water:0,portrait:0,signature:0};
+    const w=canvas.width,h=canvas.height,buf=ctx.getImageData(0,0,w,h).data;
+    let water=0,portrait=0,signature=0;
+    // Sample dense enough to catch thin rolling surf, including high-DPI.
+    for(let y=0;y<h;y+=3)for(let x=0;x<w;x+=3){
+      const alpha=buf[(y*w+x)*4+3];
+      const nx=x/w,ny=y/h;
+      if(nx>.55&&nx<.98&&ny>.47&&ny<.81){
+        water+=alpha;
+        signature+=alpha*(1+((x*3+y*7)%13));
+      }
+      if(nx>.19&&nx<.3&&ny>.26&&ny<.55)portrait+=alpha;
+    }
+    return {water,portrait,signature};
+  });
+  const before=await measure();
+  await page.waitForTimeout(750);
+  const after=await measure();
+  expect(before.water).toBeGreaterThan(1500);
+  expect(after.water).toBeGreaterThan(1500);
+  expect(Math.abs(after.signature-before.signature)).toBeGreaterThan(40);
+  expect(before.portrait).toBe(0);
+  expect(after.portrait).toBe(0);
+  await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await page.waitForTimeout(500);
+  expect((await measure()).water).toBeGreaterThan(1500);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(water).toBeHidden();
+});
