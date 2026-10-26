@@ -30,6 +30,9 @@ jobs:
         run: |
           npm run build
           npm run audit:media
+          # Fail packaging if the initial light theme was accidentally changed.
+          grep -Fq "const [theme,setTheme]=useState<Theme>('light')" src/main.tsx
+          grep -Fq 'data-theme="light"' index.html
           test -f public/images/hero-light-4k.webp
           test -f public/images/hero-dark-4k.webp
           test -f public/projects/baby-nest/preview.mp4
