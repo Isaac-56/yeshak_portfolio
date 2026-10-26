@@ -140,6 +140,15 @@ function Home(){
   <section ref={heroRef} className="hero" aria-label="Introduction">
     <div className="hero-photo light-scene" role="img" aria-label="Walking on a misty beach at sunset"/>
     <div className="hero-photo dark-scene" aria-hidden="true"/>
+    <div className="hero-living-elements" aria-hidden="true">
+      <div className="hero-water-motion hero-water-light"/>
+      <div className="hero-water-motion hero-water-dark"/>
+      <div className="hero-water-reflection hero-water-reflection-one"/>
+      <div className="hero-water-reflection hero-water-reflection-two"/>
+      <div className="hero-fabric-motion hero-fabric-light"/>
+      <div className="hero-fabric-motion hero-fabric-dark"/>
+      <div className="hero-air-trails"/>
+    </div>
     <div className="hero-shade"/>
     <HeroBirds/>
     <div className="hero-corner hero-corner-top"><span>Independent designer & developer</span><span>Based in Addis Ababa, Ethiopia</span></div>
