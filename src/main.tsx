@@ -233,48 +233,69 @@ function AllWork(){
    exiting.current=true;
    footerExitAt.current=performance.now();
    const top=window.scrollY+footer.getBoundingClientRect().top;
-   // Real document scroll: never require dragging the scrollbar manually.
+   window.scrollTo({top:Math.round(top),behavior:reduceMotion()?'instant':'smooth'});
+ };
+ const returnToGallery=()=>{
+   exiting.current=false;
+   lockedUntil.current=0;
+   const gallery=stage.current;
+   if(!gallery)return;
+   const top=window.scrollY+gallery.getBoundingClientRect().top;
    window.scrollTo({top:Math.round(top),behavior:reduceMotion()?'instant':'smooth'});
  };
  const stepTo=(next:number)=>{
    if(next<0||next>=count||next===position.current)return;
    setTravel(next>position.current?'forward':'backward');
    position.current=next;
-   lockedUntil.current=performance.now()+235;
+   lockedUntil.current=performance.now()+170;
    setActive(next);
  };
  useEffect(()=>{
    const el=stage.current;if(!el)return;
-   // Scroll gestures must be immediate, but trackpad inertia must not
-   // trigger multiple projects or leak through to the footer.
+   // A reverse wheel gesture must never inherit the forward animation lock.
+   // Mouse-wheel notches are allowed promptly; short trackpad bursts count as
+   // one gesture. In the footer, a reverse gesture returns directly to Sarabi.
    let lastWheelAt=0;
    let lastDirection=0;
+   let lastAdvanceAt=0;
    let gestureConsumed=false;
+   let gestureDistance=0;
    const wheel=(event:WheelEvent)=>{
-     if(event.ctrlKey)return;
+     if(event.ctrlKey||event.deltaY===0)return;
      const now=performance.now();
+     const direction=event.deltaY>0?1:-1;
      if(exiting.current){
-       // Leave the page in native scroll mode after entering the footer.
-       // Re-arm the gallery only on a genuine return to its top.
-       if(window.scrollY<8&&now-footerExitAt.current>850)exiting.current=false;
-       else return;
+       if(window.scrollY<8){exiting.current=false;}
+       else if(direction<0){
+         event.preventDefault();
+         returnToGallery();
+         lastWheelAt=now;
+         lastDirection=direction;
+         gestureConsumed=true;
+         lastAdvanceAt=now;
+         return;
+       }else return; // Native scrolling remains available within the footer.
      }
      const rect=el.getBoundingClientRect();
      if(rect.bottom<=window.innerHeight*.47||rect.top>=window.innerHeight*.53)return;
-     if(event.deltaY===0)return;
      event.preventDefault();
      const amount=Math.abs(event.deltaY)*(event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1);
-     const direction=event.deltaY>0?1:-1;
-     if(now-lastWheelAt>95||direction!==lastDirection)gestureConsumed=false;
+     const reversed=direction!==lastDirection;
+     const fresh=now-lastWheelAt>105||reversed;
+     if(fresh){
+       gestureConsumed=false;
+       gestureDistance=0;
+     }
+     gestureDistance+=amount;
      lastWheelAt=now;
      lastDirection=direction;
-     if(amount<2||gestureConsumed)return;
-     if(now<lockedUntil.current)return;
+     if(gestureDistance<7||gestureConsumed)return;
+     // Do not throw away the first reverse notch because the prior forward
+     // transition is still settling. It should respond immediately.
+     if(!reversed&&now-lastAdvanceAt<175)return;
      gestureConsumed=true;
-     if(direction>0&&position.current===count-1){
-       revealFooter();
-       return;
-     }
+     lastAdvanceAt=now;
+     if(direction>0&&position.current===count-1){revealFooter();return;}
      stepTo(position.current+direction);
    };
    const key=(event:KeyboardEvent)=>{
@@ -287,6 +308,7 @@ function AllWork(){
      if(event.key==='Home')next=0;
      if(event.key==='End')next=count-1;
      if(next===null||next<0)return;
+     if(exiting.current){event.preventDefault();returnToGallery();return;}
      if(next>=count){
        event.preventDefault();
        revealFooter();
@@ -300,7 +322,8 @@ function AllWork(){
      if(touchY.current===null)return;
      const delta=touchY.current-(event.changedTouches[0]?.clientY??touchY.current);
      touchY.current=null;
-     if(Math.abs(delta)>26 && performance.now()>=lockedUntil.current){
+     if(Math.abs(delta)>26){
+       if(exiting.current){if(delta<0)returnToGallery();return;}
        if(delta>0&&position.current===count-1)revealFooter();
        else stepTo(position.current+(delta>0?1:-1));
      }
