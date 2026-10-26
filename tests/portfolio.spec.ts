@@ -211,3 +211,27 @@ test('hero living motion stays layered within portrait and honors reduced motion
  await page.emulateMedia({reducedMotion:'reduce'});
  await expect(page.locator('.hero-water-dark')).toBeHidden();
 });
+
+test('cinematic hero canvas animates without replacing the original fallback image',async ({page})=>{
+  await page.goto('/');
+  const canvas=page.locator('canvas.hero-live-canvas');
+  await expect(canvas).toHaveCount(1);
+  await expect(page.locator('.hero-photo')).toHaveCount(2);
+  const available=await page.evaluate(()=>{
+    try {const c=document.createElement('canvas');return Boolean(c.getContext('webgl'));}catch{return false;}
+  });
+  if(available){
+    await expect(canvas).toHaveAttribute('data-ready','true',{timeout:15000});
+    const pixels=await canvas.evaluate((el)=>{
+      const c=el as HTMLCanvasElement;
+      return {width:c.width,height:c.height,visible:getComputedStyle(c).opacity};
+    });
+    expect(pixels.width).toBeGreaterThan(500);
+    expect(pixels.height).toBeGreaterThan(300);
+  }
+  await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await expect(canvas).toHaveCount(1);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(canvas).toBeHidden();
+});
