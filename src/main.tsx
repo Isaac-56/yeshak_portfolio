@@ -191,51 +191,134 @@ function Works({featuredOnly=false,explorationsOnly=false}:{featuredOnly?:boolea
  <div className={`work-grid ${featuredOnly?'work-grid-featured':''}`}>{ps.map((p,i)=><WorkCard p={p} index={projects.indexOf(p)} key={p.slug}/>)}</div>
  {featuredOnly&&<div className="work-more"><Link data-magnetic to="/work">Explore every project <ArrowUpRight size={20}/></Link></div>}
  </section>}
+const showcasePalettes=[
+ {bg:'#DFCECA',ink:'#482C35',accent:'#9A515A',deep:'#281C29',onDark:'#FFE7DF'},
+ {bg:'#466980',ink:'#F6F2EA',accent:'#F6E3A6',deep:'#152C3C',onDark:'#F6F2EA'},
+ {bg:'#B8D7C8',ink:'#204F42',accent:'#397665',deep:'#132C29',onDark:'#E9F6E7'},
+ {bg:'#C1DAD2',ink:'#23584E',accent:'#438978',deep:'#173B39',onDark:'#DCF4E9'},
+ {bg:'#B4A7D6',ink:'#302A55',accent:'#5A438C',deep:'#26203E',onDark:'#F5E7FF'},
+ {bg:'#E0CAAD',ink:'#563B2D',accent:'#9C6D41',deep:'#38281E',onDark:'#FBE4C8'},
+ {bg:'#A9B8AF',ink:'#264038',accent:'#486957',deep:'#24342C',onDark:'#EEE4D0'}
+] as const;
+
 function AllWork(){
  const [active,setActive]=useState(0);
- const panels=useRef<Array<HTMLElement|null>>([]);
+ const [travel,setTravel]=useState<'forward'|'backward'>('forward');
+ const stage=useRef<HTMLDivElement>(null);
+ const position=useRef(0);
+ const lockedUntil=useRef(0);
+ const touchY=useRef<number|null>(null);
+ const count=projects.length;
+ const stepTo=(next:number)=>{
+   if(next<0||next>=count||next===position.current)return;
+   setTravel(next>position.current?'forward':'backward');
+   position.current=next;
+   lockedUntil.current=performance.now()+700;
+   setActive(next);
+ };
  useEffect(()=>{
-   const io=new IntersectionObserver(entries=>{
-     const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
-     if(visible[0]){
-       const index=Number((visible[0].target as HTMLElement).dataset.projectIndex);
-       if(Number.isInteger(index))setActive(index);
-     }
-   },{rootMargin:'-20% 0px -25% 0px',threshold:[.1,.25,.5,.75]});
-   panels.current.forEach(el=>{if(el)io.observe(el)});
-   return()=>io.disconnect();
+   const el=stage.current;if(!el)return;
+   const wheel=(event:WheelEvent)=>{
+     if(Math.abs(event.deltaY)<7)return;
+     const next=position.current+(event.deltaY>0?1:-1);
+     // At the edges, natural page scrolling reaches the footer or returns upward.
+     if(next<0||next>=count)return;
+     event.preventDefault();
+     if(performance.now()<lockedUntil.current)return;
+     stepTo(next);
+   };
+   const key=(event:KeyboardEvent)=>{
+     if(event.altKey||event.ctrlKey||event.metaKey||document.querySelector('.fullscreen-menu-open'))return;
+     const target=event.target as HTMLElement|null;
+     if(target?.closest('input,textarea,select,[contenteditable="true"]'))return;
+     let next:number|null=null;
+     if(event.key==='ArrowDown'||event.key==='ArrowRight'||event.key==='PageDown')next=position.current+1;
+     if(event.key==='ArrowUp'||event.key==='ArrowLeft'||event.key==='PageUp')next=position.current-1;
+     if(event.key==='Home')next=0;
+     if(event.key==='End')next=count-1;
+     if(next===null||next<0||next>=count)return;
+     event.preventDefault();stepTo(next);
+   };
+   const onTouchStart=(event:TouchEvent)=>{touchY.current=event.changedTouches[0]?.clientY??null};
+   const onTouchEnd=(event:TouchEvent)=>{
+     if(touchY.current===null)return;
+     const delta=touchY.current-(event.changedTouches[0]?.clientY??touchY.current);
+     touchY.current=null;
+     if(Math.abs(delta)>38 && performance.now()>=lockedUntil.current)stepTo(position.current+(delta>0?1:-1));
+   };
+   el.addEventListener('wheel',wheel,{passive:false});
+   el.addEventListener('touchstart',onTouchStart,{passive:true});
+   el.addEventListener('touchend',onTouchEnd,{passive:true});
+   window.addEventListener('keydown',key);
+   return()=>{
+     el.removeEventListener('wheel',wheel);
+     el.removeEventListener('touchstart',onTouchStart);
+     el.removeEventListener('touchend',onTouchEnd);
+     window.removeEventListener('keydown',key);
+   };
  },[]);
- return <main className="work-archive inner-page">
-   <section className="archive-intro wrap">
-     <div className="archive-kicker" data-reveal><span>Independent designer & developer</span><span>Portfolio / 2026</span></div>
-     <h1 data-reveal>All <em>the work.</em><span className="archive-title-count">{String(projects.length).padStart(2,'0')}</span></h1>
-     <div className="archive-intro-bottom" data-reveal><p>Seven ideas, seven different worlds. Explore the work through a living gallery—and enter each case study for the complete story.</p><a href="#archive-project-1">Scroll to discover <ArrowDownRight size={20}/></a></div>
-   </section>
-   <nav className="archive-rail" aria-label="Jump to a portfolio project">
-     <span className="archive-rail-caption">INDEX</span>
-     {projects.map((p,i)=><a key={p.slug} href={`#archive-project-${i+1}`} className={active===i?'active':''} aria-label={`Jump to ${p.name}`} aria-current={active===i?'location':undefined}><span>{String(i+1).padStart(2,'0')}</span><span className="archive-rail-label">{p.name}</span></a>)}
-   </nav>
-   <div className="archive-projects">
-     {projects.map((p,i)=><section id={`archive-project-${i+1}`} className={`archive-panel archive-panel-${i%2?'reverse':'normal'} ${p.video?'archive-panel-film':'archive-panel-static'}`} data-project-index={i} key={p.slug} ref={el=>{panels.current[i]=el;}} style={{'--archive-accent':p.accent} as React.CSSProperties}>
-       <div className="archive-panel-backdrop" aria-hidden="true"><span>{String(i+1).padStart(2,'0')}</span></div>
-       <div className="archive-panel-layout wrap">
-         <div className="archive-panel-copy">
-           <span className="archive-panel-counter"><span>{String(i+1).padStart(2,'0')} / {String(projects.length).padStart(2,'0')}</span><span>{p.featured?'Selected favorites / Motion':'Design exploration / Interface'}</span></span>
-           <h2>{p.name}<span className="archive-name-dot">.</span></h2>
-           <p className="archive-panel-subtitle">{p.label}</p>
-           <p className="archive-panel-summary">{p.overview}</p>
-           <div className="archive-panel-meta"><span>{p.kind}</span><span>{p.year}</span><span>{frames[p.slug]?.length||0} original screens</span></div>
-           <Link className="archive-open-project" to={`/work/${p.slug}`} aria-label={`Explore ${p.name} case study`}>Explore case study <ArrowUpRight size={25}/></Link>
+ const palette=showcasePalettes[active];
+ const prev=projects[(active+count-1)%count];
+ const next=projects[(active+1)%count];
+ const style={
+   '--showcase-bg':palette.bg,
+   '--showcase-ink':palette.ink,
+   '--showcase-accent':palette.accent,
+   '--showcase-deep':palette.deep,
+   '--showcase-on-dark':palette.onDark
+ } as React.CSSProperties;
+ return <main className="work-archive showcase-work-page">
+   <div ref={stage} className={'showcase-stage showcase-travel-'+travel} style={style} role="region" aria-label="Selected work. Scroll, swipe, use the arrows, or select a project number.">
+     <div className="showcase-grain" aria-hidden="true"/>
+     <div className="showcase-topline"><span>SELECTED WORK / 2026</span><span>DESIGN × DEVELOPMENT</span></div>
+     <div className="showcase-scenes">
+     {projects.map((p,i)=>{
+       const selected=active===i;
+       const phase=i<active?'before':i>active?'after':'current';
+       return <section key={p.slug} className={'archive-panel showcase-slide showcase-'+phase} aria-hidden={!selected} data-project-index={i} data-project-slug={p.slug}>
+         <div className="showcase-copy">
+           <p className="showcase-overline"><span>{String(i+1).padStart(2,'0')} / {String(count).padStart(2,'0')}</span><span>{p.year} · {p.video?'MOTION CASE STUDY':'INTERFACE DESIGN'}</span></p>
+           <h1 className="showcase-project-name">{p.name}</h1>
+           <p className="showcase-project-label">{p.label}</p>
+           <p className="showcase-project-summary">{p.overview}</p>
+           <Link to={'/work/'+p.slug} className="showcase-case-link" tabIndex={selected?0:-1} aria-label={'Open '+p.name+' case study'}>OPEN CASE STUDY <ArrowUpRight size={18}/></Link>
+           <div className="showcase-small-preview" aria-hidden="true">
+             {selected && p.video?<PreviewVideo p={p}/>:<img src={imageFor(p.slug,p.slug==='sarabi'?1:2)} alt="" loading={selected?'eager':'lazy'}/>}
+             <span>{p.kind}</span>
+           </div>
          </div>
-         <div className="archive-panel-visual" style={{background:p.accent}}>
-           {p.video?<PreviewVideo p={p}/>:<CoverDevices p={p}/>}
-           <span className="archive-panel-visual-label">{p.featured?'Motion preview':'Interface preview'} <span>↗</span></span>
+         <div className="showcase-art-area" aria-hidden="true">
+           <div className="showcase-visual-rail">
+             <div className="showcase-ghost showcase-ghost-top"><img src={imageFor(prev.slug,prev.slug==='sarabi'?1:2)} alt="" loading="lazy"/></div>
+             <div className="showcase-feature" style={{background:p.accent}}>
+               {p.slug==='sarabi'
+                 ?<div className="showcase-feature-browser"><img src={imageFor(p.slug,1)} alt=""/></div>
+                 :<div className="showcase-phones">
+                    <img src={imageFor(p.slug,1)} alt=""/>
+                    <img src={imageFor(p.slug,2)} alt=""/>
+                    <img src={imageFor(p.slug,3)} alt=""/>
+                   </div>}
+               <span className="showcase-feature-watermark">{p.name}</span>
+             </div>
+             <div className="showcase-ghost showcase-ghost-bottom"><img src={imageFor(next.slug,next.slug==='sarabi'?1:2)} alt="" loading="lazy"/></div>
+           </div>
          </div>
+       </section>;
+     })}
+     </div>
+     <nav className="showcase-index" aria-label="Choose project">
+       {projects.map((p,i)=><button type="button" key={p.slug} className={i===active?'is-active':''} onClick={()=>stepTo(i)} aria-label={'Show '+p.name} aria-current={i===active?'step':undefined}><span className="showcase-index-dot"/><span className="showcase-index-text">{String(i+1).padStart(2,'0')}</span></button>)}
+     </nav>
+     <div className="showcase-controls">
+       <span>SCROLL TO EXPLORE <ArrowDownRight size={16}/></span>
+       <div className="showcase-control-buttons">
+         <button type="button" onClick={()=>stepTo(active-1)} disabled={active===0} aria-label="Previous project"><ArrowLeft size={19}/></button>
+         <span aria-live="polite">{String(active+1).padStart(2,'0')} — {String(count).padStart(2,'0')}</span>
+         <button type="button" onClick={()=>stepTo(active+1)} disabled={active===count-1} aria-label="Next project"><ArrowRight size={19}/></button>
        </div>
-       <span className="archive-panel-bottom-index">{String(i+1).padStart(2,'0')} — {String(projects.length).padStart(2,'0')}</span>
-     </section>)}
+     </div>
    </div>
-   <div className="archive-end wrap"><span>You've seen the work.</span><Link to="/contact">Let's make something next. <ArrowUpRight/></Link></div>
+   <div className="showcase-end wrap"><span>THAT'S THE WORK. THE NEXT ONE COULD BE YOURS.</span><Link to="/contact">Let's create something together <ArrowUpRight size={24}/></Link></div>
  </main>;
 }
 function Phone({src,label,width,height,variant='phone'}:{src:string;label:string;width:number;height:number;variant?:'phone'|'tablet'}){
