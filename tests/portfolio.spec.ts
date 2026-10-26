@@ -231,3 +231,16 @@ test('full Yeshak Tsegaye hero heading never clips off either viewport edge',asy
    expect(result.scrollWidth,`Horizontal overflow at ${viewport.width}`).toBeLessThanOrEqual(result.viewport+2);
  }
 });
+
+test('site always opens in light mode even after a previously stored dark preference',async ({page})=>{
+  await page.addInitScript(()=>{
+    localStorage.setItem('yt-theme-final','dark');
+  });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme','light');
+  await expect(page.locator('html')).toHaveAttribute('style',/color-scheme:\\s*light/i);
+  await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme','light');
+});
