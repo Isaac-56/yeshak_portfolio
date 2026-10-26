@@ -223,51 +223,59 @@ function AllWork(){
  const position=useRef(0);
  const lockedUntil=useRef(0);
  const exiting=useRef(false);
+ const footerExitAt=useRef(0);
  const touchY=useRef<number|null>(null);
  const [imageStep,setImageStep]=useState(0);
  const count=projects.length;
  const revealFooter=()=>{
+   const footer=document.querySelector<HTMLElement>('footer.footer');
+   if(!footer)return;
    exiting.current=true;
-   document.querySelector<HTMLElement>('footer.footer')?.scrollIntoView({behavior:reduceMotion()?'auto':'smooth',block:'start'});
+   footerExitAt.current=performance.now();
+   const top=window.scrollY+footer.getBoundingClientRect().top;
+   // Real document scroll: never require dragging the scrollbar manually.
+   window.scrollTo({top:Math.round(top),behavior:reduceMotion()?'instant':'smooth'});
  };
  const stepTo=(next:number)=>{
    if(next<0||next>=count||next===position.current)return;
    setTravel(next>position.current?'forward':'backward');
    position.current=next;
-   lockedUntil.current=performance.now()+460;
+   lockedUntil.current=performance.now()+235;
    setActive(next);
  };
  useEffect(()=>{
    const el=stage.current;if(!el)return;
-   // Treat continuous trackpad momentum / several rapid wheel pulses as ONE gesture.
-   // Capture at window level so no wheel event can escape to the footer.
+   // Scroll gestures must be immediate, but trackpad inertia must not
+   // trigger multiple projects or leak through to the footer.
    let lastWheelAt=0;
+   let lastDirection=0;
    let gestureConsumed=false;
    const wheel=(event:WheelEvent)=>{
-     if(event.ctrlKey)return; // Preserve pinch-to-zoom and browser zoom.
-     // Once the footer is revealed, let the page scroll normally until
-     // the visitor returns to the top of the gallery.
+     if(event.ctrlKey)return;
+     const now=performance.now();
      if(exiting.current){
-       if(window.scrollY<=2&&event.deltaY<0)exiting.current=false;
+       // Leave the page in native scroll mode after entering the footer.
+       // Re-arm the gallery only on a genuine return to its top.
+       if(window.scrollY<8&&now-footerExitAt.current>850)exiting.current=false;
        else return;
      }
      const rect=el.getBoundingClientRect();
-     if(rect.bottom<window.innerHeight*.46||rect.top>window.innerHeight*.54)return;
+     if(rect.bottom<=window.innerHeight*.47||rect.top>=window.innerHeight*.53)return;
      if(event.deltaY===0)return;
      event.preventDefault();
-     const now=performance.now();
-     // A new, short deliberate gesture needs only a brief release, not
-     // a long wheel spin. Continuous trackpad inertia remains one gesture.
-     if(now-lastWheelAt>145)gestureConsumed=false;
+     const amount=Math.abs(event.deltaY)*(event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1);
+     const direction=event.deltaY>0?1:-1;
+     if(now-lastWheelAt>95||direction!==lastDirection)gestureConsumed=false;
      lastWheelAt=now;
-     if(Math.abs(event.deltaY)<2||gestureConsumed)return;
-     gestureConsumed=true;
+     lastDirection=direction;
+     if(amount<2||gestureConsumed)return;
      if(now<lockedUntil.current)return;
-     if(event.deltaY>0&&position.current===count-1){
+     gestureConsumed=true;
+     if(direction>0&&position.current===count-1){
        revealFooter();
        return;
      }
-     stepTo(position.current+(event.deltaY>0?1:-1));
+     stepTo(position.current+direction);
    };
    const key=(event:KeyboardEvent)=>{
      if(event.altKey||event.ctrlKey||event.metaKey||document.querySelector('.fullscreen-menu-open'))return;
@@ -343,6 +351,11 @@ function AllWork(){
        const selectedScreens=showcaseFeatureScreens[p.slug]??[1,2,3];
        const sequence=showcaseStaticSequences[p.slug];
        const dynamicScreen=(offset:number)=>sequence&&selected?sequence[(imageStep+offset)%sequence.length]:selectedScreens[offset%3];
+       // The companion thumbnail deliberately uses different screens than
+       // the three large devices, so it adds information instead of repeating.
+       const miniScreen=(offset:number)=>sequence
+         ?sequence[((selected?imageStep:0)+3+offset)%sequence.length]
+         :selectedScreens[(offset+1)%3];
        return <section key={p.slug} className={'archive-panel showcase-slide showcase-'+phase} aria-hidden={!selected} data-project-index={i} data-project-slug={p.slug}>
          <div className="showcase-copy">
            <p className="showcase-overline"><span>{String(i+1).padStart(2,'0')} / {String(count).padStart(2,'0')}</span><span>{p.year} · {p.video?'MOTION CASE STUDY':'INTERFACE DESIGN'}</span></p>
@@ -351,11 +364,21 @@ function AllWork(){
            <p className="showcase-project-summary">{p.overview}</p>
            <Link to={'/work/'+p.slug} className="showcase-case-link" tabIndex={selected?0:-1} aria-label={'Open '+p.name+' case study'}>OPEN CASE STUDY <ArrowUpRight size={18}/></Link>
            <div className="showcase-small-preview" aria-hidden="true">
-             {selected && p.video?<PreviewVideo p={p}/>:
-              <div className="showcase-preview-slideshow">
-                <img key={p.slug+'-mini-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,sequence?dynamicScreen(0):selectedScreens[0])} alt="" loading={selected?'eager':'lazy'}/>
-              </div>}
-             <span>{p.kind}</span>
+             {selected && p.video
+               ?<div className="showcase-preview-film">
+                  <PreviewVideo p={p}/>
+                  <span className="showcase-preview-tag">LIVE MOTION / 01</span>
+                </div>
+               :<div className="showcase-preview-editorial">
+                  <div className="showcase-preview-device">
+                    <img key={p.slug+'-mini-a-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,miniScreen(0))} alt="" loading={selected?'eager':'lazy'}/>
+                  </div>
+                  <div className="showcase-preview-device showcase-preview-device-alt">
+                    <img key={p.slug+'-mini-b-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,miniScreen(1))} alt="" loading={selected?'eager':'lazy'}/>
+                  </div>
+                  <span className="showcase-preview-tag">ADDITIONAL SCREENS / {String((selected?imageStep:0)%7+1).padStart(2,'0')}</span>
+                </div>}
+             <span className="showcase-preview-caption">{p.video?'CINEMATIC WALKTHROUGH':p.kind}</span>
            </div>
          </div>
          <div className="showcase-art-area" aria-hidden="true">
