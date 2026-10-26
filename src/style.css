@@ -1023,3 +1023,22 @@
 @media(max-width:750px){
   .showcase-small-preview{display:none}
 }
+
+/* Sarabi's tall restaurant web design is showcased at readable browser width,
+   with a deliberate slow vertical journey instead of squeezing the full page. */
+.showcase-feature-browser{position:relative;isolation:isolate;overflow:hidden}
+.showcase-feature-browser img.showcase-sarabi-site-pan{
+  position:absolute;top:0;left:0;
+  width:100%;height:auto!important;min-height:0;
+  object-fit:initial!important;object-position:top!important;
+  transform:translate3d(0,0,0);
+  animation:showcase-sarabi-page-scroll 15s ease-in-out infinite alternate;
+  will-change:transform;
+}
+@keyframes showcase-sarabi-page-scroll{
+  0%,12%{transform:translate3d(0,0,0)}
+  88%,100%{transform:translate3d(0,-58%,0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .showcase-feature-browser img.showcase-sarabi-site-pan{animation:none!important}
+}
