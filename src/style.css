@@ -803,3 +803,7 @@
  .showcase-stage,.showcase-slide.archive-panel,.showcase-copy,
  .showcase-visual-rail,.showcase-feature{transition:none!important;animation:none!important}
 }
+
+/* Match the nav ink to the selected slide, including its theme variant. */
+.app-root:has(.showcase-work-page) .site-nav{color:var(--work-nav-light,var(--fg));transition:color .65s}
+:root[data-theme=dark] .app-root:has(.showcase-work-page) .site-nav{color:var(--work-nav-dark,#f5f1ec)}
