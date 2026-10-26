@@ -36,11 +36,14 @@ test('animated menu, keyboard navigation and route transitions', async ({page}) 
   await expect(page.locator('.about-services .service-row').first()).toHaveClass(/is-visible/);
 });
 
-test('work page, featured hierarchy and navigation', async ({page}) => {
+test('all work archive features seven immersive project chapters', async ({page}) => {
   await page.goto('/work');
-  await expect(page.locator('.works-featured .work-card')).toHaveCount(3);
-  await expect(page.locator('.works-explorations .work-card')).toHaveCount(4);
-  await page.locator('.works-featured .work-card').first().click();
+  await expect(page.locator('.archive-panel')).toHaveCount(7);
+  await expect(page.locator('.archive-panel-film')).toHaveCount(3);
+  await expect(page.locator('.archive-rail a')).toHaveCount(7);
+  await expect(page.locator('.archive-panel h2').first()).toContainText('Baby Nest');
+  await expect(page.locator('.archive-panel h2').last()).toContainText('Sarabi');
+  await page.locator('.archive-panel').first().getByRole('link',{name:/Explore Baby Nest case study/}).click();
   await expect(page).toHaveURL(/\/work\/baby-nest$/);
 });
 
@@ -164,4 +167,34 @@ test('birds remain within the upper-right sky stage, never crossing the person',
   expect(stage.y).toBeLessThan(hero.y+hero.height*.45);
   const style=await page.locator('.hero-flock-distant').evaluate(el=>getComputedStyle(el).animationName);
   expect(style).toMatch(/corner-bird-drift/);
+});
+
+test('homepage all-work link opens the immersive archive', async ({page})=>{
+  await page.goto('/');
+  await page.getByRole('link',{name:/Explore every project/}).click();
+  await expect(page).toHaveURL(/\/work$/);
+  await expect(page.locator('.archive-panel')).toHaveCount(7);
+});
+
+test('desktop hero navigation is visibly larger', async ({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto('/');
+  const sizes=await page.locator('.desktop-links a').evaluateAll(anchors=>anchors.map(el=>parseFloat(getComputedStyle(el).fontSize)));
+  expect(sizes).toHaveLength(3);
+  expect(Math.min(...sizes)).toBeGreaterThanOrEqual(20);
+});
+
+test('contact form clearly explains provider errors instead of claiming success', async ({page})=>{
+  await page.goto('/contact');
+  await page.locator('#contact-name').fill('Test User');
+  await page.locator('#contact-email').fill('test@example.com');
+  await page.locator('#contact-subject').fill('Test');
+  await page.locator('#contact-message').fill('No real message will be sent.');
+  await page.route('**/api.emailjs.com/**', route=>route.fulfill({
+    status:403,contentType:'text/plain',body:'Origin is blocked by allowlist.',
+    headers:{'access-control-allow-origin':'*'}
+  }));
+  await page.getByRole('button',{name:/Send message/}).click();
+  await expect(page.locator('.contact-error')).toContainText('403',{timeout:10000});
+  await expect(page.locator('.contact-success')).toHaveCount(0);
 });
