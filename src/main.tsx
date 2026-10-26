@@ -258,6 +258,12 @@ function AllWork(){
    };
  },[]);
  const palette=showcasePalettes[active];
+ useEffect(()=>{
+   const root=document.documentElement;
+   root.style.setProperty('--work-nav-light',showcasePalettes[active].ink);
+   root.style.setProperty('--work-nav-dark',showcasePalettes[active].onDark);
+   return()=>{root.style.removeProperty('--work-nav-light');root.style.removeProperty('--work-nav-dark')};
+ },[active]);
  const prev=projects[(active+count-1)%count];
  const next=projects[(active+1)%count];
  const style={
