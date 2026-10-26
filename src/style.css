@@ -921,3 +921,7 @@
    font-size:clamp(37px,9.7vw,65px);line-height:1.03;
  }
 }
+
+/* The bottom status row must not block project links above it. */
+.showcase-controls{pointer-events:none}
+.showcase-controls button{pointer-events:auto}
