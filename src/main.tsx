@@ -117,7 +117,6 @@ function App(){
     </div>}
     <div className={`preloader ${loader?'preloader-active':'preloader-finished'}`} aria-hidden="true"><span>Yeshak<span className="period">.</span></span><div className="preloader-bar"/></div>
     <Cursor/>
-    <a className="skip-to-content" href="#site-content">Skip to content</a>
     <header className={`site-nav ${isHome?'site-nav-hero':'site-nav-page'} ${menu?'site-nav-open':''}`}>
       <div className="nav-wrap"><Link className="brand" to="/">© Code by Yeshak</Link>
       <nav className="desktop-links" aria-label="Main navigation"><Link to="/work">Work</Link><Link to="/about">About</Link><Link to="/contact">Contact</Link></nav>
