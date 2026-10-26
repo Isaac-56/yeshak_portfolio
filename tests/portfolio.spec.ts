@@ -201,7 +201,7 @@ test('contact form clearly explains provider errors instead of claiming success'
 
 test('hero living motion stays layered within portrait and honors reduced motion',async ({page})=>{
  await page.goto('/');
- await expect(page.locator('.hero-living-elements')).toBeVisible();
+ await expect(page.locator('.hero-living-elements')).toHaveCount(1); // Motion fallback is hidden once GPU canvas is ready.
  await expect(page.locator('.hero-water-motion')).toHaveCount(2);
  await expect(page.locator('.hero-fabric-motion')).toHaveCount(2);
  const wave=await page.locator('.hero-water-light').evaluate(el=>getComputedStyle(el).animationName);
