@@ -20,6 +20,7 @@ export default function ContactPage() {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+  const [preparedEmail, setPreparedEmail] = useState('mailto:yeshak34@gmail.com');
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,6 +36,7 @@ export default function ContactPage() {
     }
     setSending(true);
     setError('');
+    setPreparedEmail(`mailto:yeshak34@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`);
     try {
       // Support the original main-branch variable names AND standard EmailJS
       // templates. Recipient stays configured in the EmailJS template itself.
@@ -62,6 +64,8 @@ export default function ContactPage() {
       const text = String(details?.text || details?.message || '').slice(0, 220);
       if (status === 403) {
         setError('Email delivery was blocked by the email service (403). The service account, origin allowlist or CAPTCHA settings need checking. Your message has not been sent.');
+      } else if (status === 412) {
+        setError('Email delivery is temporarily unavailable (provider authorization error 412). Your message was not sent. You can open a prepared email below instead.');
       } else if (status === 400 || status === 404 || status === 422) {
         setError(`Email service configuration needs attention (error ${status}${text ? `: ${text}` : ''}). Your message has not been sent.`);
       } else if (status === 429) {
@@ -132,7 +136,7 @@ export default function ContactPage() {
                 <label htmlFor="contact-message">Message <span aria-hidden="true">*</span></label>
                 <textarea id="contact-message" name="message" rows={7} required maxLength={8000} placeholder="Tell me about your project..." disabled={sending}/>
               </div>
-              {error && <p className="contact-error" role="alert">{error} <a href="mailto:yeshak34@gmail.com">Email directly <ArrowUpRight size={14}/></a></p>}
+              {error && <div className="contact-error" role="alert"><p>{error}</p><a href={preparedEmail}>Open your email app with this message <ArrowUpRight size={14}/></a></div>}
               <div className="contact-form-actions">
                 <button className="contact-send" type="submit" disabled={sending}>{sending ? 'Sending…' : 'Send message'}<Send size={18}/></button>
                 <span>I'll only use your details to respond.</span>
