@@ -1,0 +1,101 @@
+name: Package Yeshak portfolio ZIP files
+
+on:
+  push:
+    branches: ["redesign/portfolio-v3-review"]
+    paths:
+      - ".github/workflows/package-portfolio-zips.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout selected review branch
+        uses: actions/checkout@v4
+
+      - name: Install Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies and restore all portfolio media
+        run: npm install
+
+      - name: Validate build and project media
+        run: |
+          npm run build
+          npm run audit:media
+          test -f public/images/hero-light-4k.webp
+          test -f public/images/hero-dark-4k.webp
+          test -f public/projects/baby-nest/preview.mp4
+          test -f public/projects/reclaim/preview.mp4
+          test -f public/projects/yenebet/preview.mp4
+
+      - name: Package editable complete source
+        shell: bash
+        run: |
+          mkdir -p release/Yeshak_Portfolio_Source
+          rsync -a ./ release/Yeshak_Portfolio_Source/ \
+            --exclude='release' \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='test-results' \
+            --exclude='playwright-report' \
+            --exclude='.env' \
+            --exclude='.env.*'
+          cat >release/Yeshak_Portfolio_Source/START_HERE.txt <<'EOF'
+          YESHAK PORTFOLIO — SOURCE CODE
+          Version: reviewed V3 branch (light mode default)
+
+          1. Install Node.js 22+.
+          2. Extract this ZIP.
+          3. Open a terminal in the extracted Yeshak_Portfolio_Source folder.
+          4. Run: npm install
+          5. Run: npm run dev
+          6. Visit http://localhost:5173
+
+          The authentic Figma project screens and three project videos are
+          included, along with the original versioned restore-media packs.
+          The site always starts in light mode; the dark-mode toggle works.
+
+          To publish a static website, use the other ZIP:
+          Yeshak_Portfolio_Website.zip
+
+          Important: The contact form uses the owner's existing EmailJS
+          service. Before deploying, configure EmailJS allowed domains.
+          EOF
+          (cd release && zip -q -r -9 ../Yeshak_Portfolio_Source.zip Yeshak_Portfolio_Source)
+          test -s Yeshak_Portfolio_Source.zip
+          unzip -tq Yeshak_Portfolio_Source.zip | tail -1
+
+      - name: Package ready-to-host static website
+        shell: bash
+        run: |
+          printf '/* /index.html 200\n' > dist/_redirects
+          (cd dist && zip -q -r -9 ../Yeshak_Portfolio_Website.zip .)
+          test -s Yeshak_Portfolio_Website.zip
+          unzip -tq Yeshak_Portfolio_Website.zip | tail -1
+
+      - name: Upload complete editable source ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yeshak_Portfolio_Source
+          path: Yeshak_Portfolio_Source.zip
+          compression-level: 0
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Upload production website ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yeshak_Portfolio_Website
+          path: Yeshak_Portfolio_Website.zip
+          compression-level: 0
+          retention-days: 90
+          if-no-files-found: error
