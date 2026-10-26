@@ -137,7 +137,7 @@ export default function LivingHero() {
       }
       ctx.restore();
       ctx.restore();
-      canvas.dataset.running = 'true';
+      canvas!.dataset.running = 'true';
     }
 
     frame = requestAnimationFrame(render);
