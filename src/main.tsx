@@ -191,6 +191,15 @@ function Works({featuredOnly=false,explorationsOnly=false}:{featuredOnly?:boolea
  <div className={`work-grid ${featuredOnly?'work-grid-featured':''}`}>{ps.map((p,i)=><WorkCard p={p} index={projects.indexOf(p)} key={p.slug}/>)}</div>
  {featuredOnly&&<div className="work-more"><Link data-magnetic to="/work">Explore every project <ArrowUpRight size={20}/></Link></div>}
  </section>}
+// Choose genuinely legible portfolio frames for the angled project artwork.
+const showcaseFeatureScreens:Record<string,[number,number,number]>={
+ 'baby-nest':[7,8,6],
+ 'reclaim':[1,2,3],
+ 'yenebet':[1,6,7],
+ 'medical-app':[1,2,3],
+ 'directed':[3,2,4],
+ 'blog-app':[10,2,4]
+};
 const showcasePalettes=[
  {bg:'#DFCECA',ink:'#482C35',accent:'#9A515A',deep:'#281C29',onDark:'#FFE7DF'},
  {bg:'#466980',ink:'#F6F2EA',accent:'#F6E3A6',deep:'#152C3C',onDark:'#F6F2EA'},
@@ -281,6 +290,7 @@ function AllWork(){
      {projects.map((p,i)=>{
        const selected=active===i;
        const phase=i<active?'before':i>active?'after':'current';
+       const selectedScreens=showcaseFeatureScreens[p.slug]??[1,2,3];
        return <section key={p.slug} className={'archive-panel showcase-slide showcase-'+phase} aria-hidden={!selected} data-project-index={i} data-project-slug={p.slug}>
          <div className="showcase-copy">
            <p className="showcase-overline"><span>{String(i+1).padStart(2,'0')} / {String(count).padStart(2,'0')}</span><span>{p.year} · {p.video?'MOTION CASE STUDY':'INTERFACE DESIGN'}</span></p>
@@ -298,11 +308,11 @@ function AllWork(){
              <div className="showcase-ghost showcase-ghost-top"><img src={imageFor(prev.slug,prev.slug==='sarabi'?1:2)} alt="" loading="lazy"/></div>
              <div className="showcase-feature" style={{background:p.accent}}>
                {p.slug==='sarabi'
-                 ?<div className="showcase-feature-browser"><img src={imageFor(p.slug,1)} alt=""/></div>
+                 ?<div className="showcase-feature-browser"><img src={imageFor(p.slug,selectedScreens[0])} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/></div>
                  :<div className="showcase-phones">
                     <img src={imageFor(p.slug,1)} alt=""/>
-                    <img src={imageFor(p.slug,2)} alt=""/>
-                    <img src={imageFor(p.slug,3)} alt=""/>
+                    <img src={imageFor(p.slug,selectedScreens[1])} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/>
+                    <img src={imageFor(p.slug,selectedScreens[2])} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/>
                    </div>}
                <span className="showcase-feature-watermark">{p.name}</span>
              </div>
