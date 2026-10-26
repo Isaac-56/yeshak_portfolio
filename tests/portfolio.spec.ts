@@ -36,15 +36,40 @@ test('animated menu, keyboard navigation and route transitions', async ({page}) 
   await expect(page.locator('.about-services .service-row').first()).toHaveClass(/is-visible/);
 });
 
-test('all work archive features seven immersive project chapters', async ({page}) => {
+test('full-screen work gallery changes project scenes through controls and keyboard', async ({page}) => {
+  await page.setViewportSize({width:1440,height:900});
   await page.goto('/work');
   await expect(page.locator('.archive-panel')).toHaveCount(7);
-  await expect(page.locator('.archive-panel-film')).toHaveCount(3);
-  await expect(page.locator('.archive-rail a')).toHaveCount(7);
-  await expect(page.locator('.archive-panel h2').first()).toContainText('Baby Nest');
-  await expect(page.locator('.archive-panel h2').last()).toContainText('Sarabi');
-  await page.locator('.archive-panel').first().getByRole('link',{name:/Explore Baby Nest case study/}).click();
-  await expect(page).toHaveURL(/\/work\/baby-nest$/);
+  await expect(page.locator('.showcase-index button')).toHaveCount(7);
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Baby Nest');
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-phones img')).toHaveCount(3);
+  await page.getByRole('button',{name:'Next project'}).click();
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+  await page.keyboard.press('ArrowRight');
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Yene Bet');
+  await page.getByRole('button',{name:'Show Sarabi Restaurant'}).click();
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Sarabi Restaurant');
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-feature-browser img')).toBeVisible();
+  await page.locator('.showcase-slide.showcase-current').getByRole('link',{name:'Open Sarabi Restaurant case study'}).click();
+  await expect(page).toHaveURL(/\/work\/sarabi$/);
+});
+
+test('cinematic work gallery scroll, theme switch and small viewport layout',async({page})=>{
+  await page.setViewportSize({width:1360,height:860});
+  await page.goto('/work');
+  await expect(page.locator('.showcase-stage')).toBeVisible();
+  await page.locator('.showcase-stage').hover({position:{x:560,y:440}});
+  await page.mouse.wheel(0,600);
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+  await expect(page.locator('.showcase-stage')).toHaveCSS('background-color','rgb(70, 105, 128)');
+  await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+  await page.setViewportSize({width:390,height:844});
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toBeVisible();
+  const width=await page.evaluate(()=>({page:document.documentElement.scrollWidth,window:innerWidth}));
+  expect(width.page).toBeLessThanOrEqual(width.window+2);
+  await page.getByRole('button',{name:'Next project'}).click();
+  await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Yene Bet');
 });
 
 for (const slug of projects) {
