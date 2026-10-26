@@ -901,3 +901,23 @@
 @media(prefers-reduced-motion:reduce){
   .showcase-swap-img{animation:none!important}
 }
+
+
+/* Long case-study names must clear the enlarged cinematic preview. */
+.showcase-copy{top:24%}
+.showcase-small-preview{pointer-events:none}
+.showcase-case-link{position:relative;z-index:8}
+.showcase-slide[data-project-slug="sarabi"] .showcase-project-name{
+  font-size:clamp(49px,5.05vw,93px);
+  line-height:1.03;
+}
+@media(max-width:1100px) and (min-width:751px){
+ .showcase-copy{top:24%}
+ .showcase-slide[data-project-slug="sarabi"] .showcase-project-name{font-size:clamp(45px,5vw,72px)}
+}
+@media(max-width:750px){
+ .showcase-copy{top:18%}
+ .showcase-slide[data-project-slug="sarabi"] .showcase-project-name{
+   font-size:clamp(37px,9.7vw,65px);line-height:1.03;
+ }
+}
