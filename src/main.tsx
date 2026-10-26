@@ -200,6 +200,12 @@ const showcaseFeatureScreens:Record<string,[number,number,number]>={
  'directed':[3,2,4],
  'blog-app':[10,2,4]
 };
+const showcaseStaticSequences:Record<string,number[]>={
+  'medical-app':[1,4,8,12,17,25,32],
+  'directed':[3,7,9,15,22,28,36],
+  'blog-app':[10,4,8,12,16,18,2],
+  'sarabi':[1,5,9,13,7,11,3]
+};
 const showcasePalettes=[
  {bg:'#DFCECA',ink:'#482C35',accent:'#9A515A',deep:'#281C29',onDark:'#FFE7DF'},
  {bg:'#466980',ink:'#F6F2EA',accent:'#F6E3A6',deep:'#152C3C',onDark:'#F6F2EA'},
@@ -217,6 +223,7 @@ function AllWork(){
  const position=useRef(0);
  const lockedUntil=useRef(0);
  const touchY=useRef<number|null>(null);
+ const [imageStep,setImageStep]=useState(0);
  const count=projects.length;
  const stepTo=(next:number)=>{
    if(next<0||next>=count||next===position.current)return;
@@ -227,14 +234,23 @@ function AllWork(){
  };
  useEffect(()=>{
    const el=stage.current;if(!el)return;
+   // Treat continuous trackpad momentum / several rapid wheel pulses as ONE gesture.
+   // Capture at window level so no wheel event can escape to the footer.
+   let lastWheelAt=0;
+   let gestureConsumed=false;
    const wheel=(event:WheelEvent)=>{
-     if(Math.abs(event.deltaY)<7)return;
-     const next=position.current+(event.deltaY>0?1:-1);
-     // At the edges, natural page scrolling reaches the footer or returns upward.
-     if(next<0||next>=count)return;
+     if(event.ctrlKey)return; // Browser zoom is never intercepted.
+     const rect=el.getBoundingClientRect();
+     if(rect.bottom<window.innerHeight*.46||rect.top>window.innerHeight*.54)return;
+     if(event.deltaY===0)return;
      event.preventDefault();
-     if(performance.now()<lockedUntil.current)return;
-     stepTo(next);
+     const now=performance.now();
+     if(now-lastWheelAt>320)gestureConsumed=false;
+     lastWheelAt=now;
+     if(Math.abs(event.deltaY)<7||gestureConsumed)return;
+     gestureConsumed=true;
+     if(now<lockedUntil.current)return;
+     stepTo(position.current+(event.deltaY>0?1:-1));
    };
    const key=(event:KeyboardEvent)=>{
      if(event.altKey||event.ctrlKey||event.metaKey||document.querySelector('.fullscreen-menu-open'))return;
@@ -249,24 +265,33 @@ function AllWork(){
      event.preventDefault();stepTo(next);
    };
    const onTouchStart=(event:TouchEvent)=>{touchY.current=event.changedTouches[0]?.clientY??null};
+   const onTouchMove=(event:TouchEvent)=>{if(touchY.current!==null&&event.cancelable)event.preventDefault()};
    const onTouchEnd=(event:TouchEvent)=>{
      if(touchY.current===null)return;
      const delta=touchY.current-(event.changedTouches[0]?.clientY??touchY.current);
      touchY.current=null;
      if(Math.abs(delta)>38 && performance.now()>=lockedUntil.current)stepTo(position.current+(delta>0?1:-1));
    };
-   el.addEventListener('wheel',wheel,{passive:false});
+   window.addEventListener('wheel',wheel,{passive:false,capture:true});
    el.addEventListener('touchstart',onTouchStart,{passive:true});
+   el.addEventListener('touchmove',onTouchMove,{passive:false});
    el.addEventListener('touchend',onTouchEnd,{passive:true});
    window.addEventListener('keydown',key);
    return()=>{
-     el.removeEventListener('wheel',wheel);
+     window.removeEventListener('wheel',wheel,true);
      el.removeEventListener('touchstart',onTouchStart);
+     el.removeEventListener('touchmove',onTouchMove);
      el.removeEventListener('touchend',onTouchEnd);
      window.removeEventListener('keydown',key);
    };
  },[]);
  const palette=showcasePalettes[active];
+ useEffect(()=>{
+   setImageStep(0);
+   if(reduceMotion()||projects[active].video)return;
+   const timer=window.setInterval(()=>setImageStep(v=>v+1),2600);
+   return()=>window.clearInterval(timer);
+ },[active]);
  useEffect(()=>{
    const root=document.documentElement;
    root.style.setProperty('--work-nav-light',showcasePalettes[active].ink);
@@ -291,6 +316,8 @@ function AllWork(){
        const selected=active===i;
        const phase=i<active?'before':i>active?'after':'current';
        const selectedScreens=showcaseFeatureScreens[p.slug]??[1,2,3];
+       const sequence=showcaseStaticSequences[p.slug];
+       const dynamicScreen=(offset:number)=>sequence&&selected?sequence[(imageStep+offset)%sequence.length]:selectedScreens[offset%3];
        return <section key={p.slug} className={'archive-panel showcase-slide showcase-'+phase} aria-hidden={!selected} data-project-index={i} data-project-slug={p.slug}>
          <div className="showcase-copy">
            <p className="showcase-overline"><span>{String(i+1).padStart(2,'0')} / {String(count).padStart(2,'0')}</span><span>{p.year} · {p.video?'MOTION CASE STUDY':'INTERFACE DESIGN'}</span></p>
@@ -299,7 +326,10 @@ function AllWork(){
            <p className="showcase-project-summary">{p.overview}</p>
            <Link to={'/work/'+p.slug} className="showcase-case-link" tabIndex={selected?0:-1} aria-label={'Open '+p.name+' case study'}>OPEN CASE STUDY <ArrowUpRight size={18}/></Link>
            <div className="showcase-small-preview" aria-hidden="true">
-             {selected && p.video?<PreviewVideo p={p}/>:<img src={imageFor(p.slug,p.slug==='sarabi'?1:2)} alt="" loading={selected?'eager':'lazy'}/>}
+             {selected && p.video?<PreviewVideo p={p}/>:
+              <div className="showcase-preview-slideshow">
+                <img key={p.slug+'-mini-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,sequence?dynamicScreen(0):selectedScreens[0])} alt="" loading={selected?'eager':'lazy'}/>
+              </div>}
              <span>{p.kind}</span>
            </div>
          </div>
@@ -308,11 +338,11 @@ function AllWork(){
              <div className="showcase-ghost showcase-ghost-top"><img src={imageFor(prev.slug,prev.slug==='sarabi'?1:2)} alt="" loading="lazy"/></div>
              <div className="showcase-feature" style={{background:p.accent}}>
                {p.slug==='sarabi'
-                 ?<div className="showcase-feature-browser"><img src={imageFor(p.slug,selectedScreens[0])} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/></div>
+                 ?<div className="showcase-feature-browser"><img key={p.slug+'-browser-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,dynamicScreen(0))} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/></div>
                  :<div className="showcase-phones">
-                    <img src={imageFor(p.slug,1)} alt=""/>
-                    <img src={imageFor(p.slug,selectedScreens[1])} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/>
-                    <img src={imageFor(p.slug,selectedScreens[2])} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/>
+                    {[0,1,2].map(offset=><div className={'showcase-phone showcase-phone-'+offset} key={offset}>
+                      <img key={p.slug+'-'+offset+'-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,dynamicScreen(offset))} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/>
+                    </div>)}
                    </div>}
                <span className="showcase-feature-watermark">{p.name}</span>
              </div>
@@ -326,7 +356,9 @@ function AllWork(){
        {projects.map((p,i)=><button type="button" key={p.slug} className={i===active?'is-active':''} onClick={()=>stepTo(i)} aria-label={'Show '+p.name} aria-current={i===active?'step':undefined}><span className="showcase-index-dot"/><span className="showcase-index-text">{String(i+1).padStart(2,'0')}</span></button>)}
      </nav>
      <div className="showcase-controls">
-       <span>SCROLL TO EXPLORE <ArrowDownRight size={16}/></span>
+       {active===count-1
+          ?<button type="button" className="showcase-finish" onClick={()=>document.querySelector('.showcase-end')?.scrollIntoView({behavior:reduceMotion()?'auto':'smooth'})}>CONTINUE BELOW <ArrowDownRight size={16}/></button>
+          :<span>SCROLL TO EXPLORE <ArrowDownRight size={16}/></span>}
        <div className="showcase-control-buttons">
          <button type="button" onClick={()=>stepTo(active-1)} disabled={active===0} aria-label="Previous project"><ArrowLeft size={19}/></button>
          <span aria-live="polite">{String(active+1).padStart(2,'0')} — {String(count).padStart(2,'0')}</span>
