@@ -6,6 +6,7 @@ import {projects, imageFor, type Project} from './projects';
 import manifest from './screen-manifest.json';
 import ContactPage from './components/ContactPage';
 import HeroBirds from './components/HeroBirds';
+import LivingHero from './components/LivingHero';
 import './style.css';
 
 type Theme = 'light'|'dark';
@@ -149,6 +150,7 @@ function Home(){
       <div className="hero-fabric-motion hero-fabric-dark"/>
       <div className="hero-air-trails"/>
     </div>
+    <LivingHero/>
     <div className="hero-shade"/>
     <HeroBirds/>
     <div className="hero-corner hero-corner-top"><span>Independent designer & developer</span><span>Based in Addis Ababa, Ethiopia</span></div>
