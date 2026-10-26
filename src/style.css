@@ -404,6 +404,88 @@
  .site-nav .menu-toggle{font-size:17px}
 }
  
+/* V7 / Living hero. Localized duplicate-image masks let the original portrait
+   remain stable while ocean and shirt highlights breathe with the scene. */
+.hero-living-elements{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;isolation:isolate}
+.hero-water-motion,.hero-fabric-motion{
+ position:absolute;inset:0;background-repeat:no-repeat;
+ background-position:center 50%;background-size:cover;
+ pointer-events:none;will-change:transform,opacity;
+}
+/* Ocean occupies the right-hand half; feathered mask avoids hard cutlines
+   and keeps the portrait, foreground sand and horizon locked in place. */
+.hero-water-motion{
+ -webkit-mask-image:radial-gradient(ellipse 45% 28% at 80% 59%,#000 27%,#000b 49%,transparent 84%);
+ mask-image:radial-gradient(ellipse 45% 28% at 80% 59%,#000 27%,#000b 49%,transparent 84%);
+ transform-origin:78% 58%;
+ animation:hero-wave-life 9.8s ease-in-out infinite alternate;
+}
+.hero-water-light{background-image:url('/images/hero-light-4k.webp');opacity:.64}
+.hero-water-dark{background-image:url('/images/hero-dark-4k.webp');opacity:0}
+:root[data-theme=dark] .hero-water-light{opacity:0}
+:root[data-theme=dark] .hero-water-dark{opacity:.76}
+.hero-water-reflection{
+ position:absolute;left:55%;top:42%;width:53%;height:38%;border-radius:50%;
+ opacity:.2;mix-blend-mode:screen;pointer-events:none;
+ background:repeating-linear-gradient(175deg,transparent 0 8px,rgba(255,230,188,.22) 9px 11px,transparent 14px 29px);
+ -webkit-mask-image:radial-gradient(ellipse at 55% 65%,#000 3%,transparent 67%);
+ mask-image:radial-gradient(ellipse at 55% 65%,#000 3%,transparent 67%);
+ transform:rotate(-10deg);
+ animation:hero-water-glitter 12s linear infinite;
+}
+.hero-water-reflection-two{opacity:.12;animation-duration:17s;animation-direction:reverse;transform:rotate(3deg)}
+:root[data-theme=dark] .hero-water-reflection{
+ background:repeating-linear-gradient(175deg,transparent 0 9px,rgba(229,113,255,.32) 10px 12px,transparent 16px 30px);
+ opacity:.24;
+}
+/* Narrow silhouette-focused masks. Motion intentionally slight: no face warping
+   or second head/body appears, even when the original image is crossfading. */
+.hero-fabric-motion{
+ -webkit-mask-image:radial-gradient(ellipse 6.5% 13% at 48.1% 50%,#0009 18%,#0003 55%,transparent 83%);
+ mask-image:radial-gradient(ellipse 6.5% 13% at 48.1% 50%,#0009 18%,#0003 55%,transparent 83%);
+ transform-origin:48% 50%;
+ animation:hero-fabric-breathe 6.7s ease-in-out infinite;
+}
+.hero-fabric-light{background-image:url('/images/hero-light-4k.webp');opacity:.45}
+.hero-fabric-dark{background-image:url('/images/hero-dark-4k.webp');opacity:0}
+:root[data-theme=dark] .hero-fabric-light{opacity:0}
+:root[data-theme=dark] .hero-fabric-dark{opacity:.57}
+.hero-air-trails{position:absolute;inset:0;opacity:.16;
+ background:linear-gradient(111deg,transparent 25%,#fff5 49%,transparent 67%);
+ width:45%;height:38%;left:-30%;top:17%;filter:blur(48px);
+ animation:hero-air-pass 16s ease-in-out infinite;pointer-events:none;
+}
+:root[data-theme=dark] .hero-air-trails{opacity:.13;filter:blur(55px) hue-rotate(80deg)}
+@keyframes hero-wave-life{
+ 0%{transform:translate3d(-.3%,.15%,0) scale(1.001) skewX(-.12deg)}
+ 50%{transform:translate3d(.5%,-.12%,0) scale(1.013) skewX(.2deg)}
+ 100%{transform:translate3d(-.1%,.2%,0) scale(1.006) skewX(-.17deg)}
+}
+@keyframes hero-fabric-breathe{
+ 0%,100%{transform:translate3d(0,0,0) scale(1)}
+ 35%{transform:translate3d(.12%,-.11%,0) scale(1.004) skewX(.22deg)}
+ 70%{transform:translate3d(-.08%,.1%,0) scale(.998) skewX(-.18deg)}
+}
+@keyframes hero-water-glitter{
+ 0%{background-position:0 0;opacity:.13}
+ 50%{opacity:.27}
+ 100%{background-position:0 140px;opacity:.15}
+}
+@keyframes hero-air-pass{
+ 0%,100%{transform:translate3d(0,0,0);opacity:0}
+ 42%{opacity:.14}
+ 72%{transform:translate3d(70vw,-6vh,0);opacity:0}
+}
+@media(max-width:720px){
+ .hero-water-motion{-webkit-mask-image:radial-gradient(ellipse 45% 24% at 80% 59%,#000 12%,transparent 85%);mask-image:radial-gradient(ellipse 45% 24% at 80% 59%,#000 12%,transparent 85%)}
+ .hero-water-reflection{opacity:.1}
+ .hero-fabric-motion{-webkit-mask-image:radial-gradient(ellipse 7% 14% at 48% 50%,#0009 10%,transparent 80%);mask-image:radial-gradient(ellipse 7% 14% at 48% 50%,#0009 10%,transparent 80%)}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-water-motion,.hero-fabric-motion,.hero-water-reflection,.hero-air-trails{animation:none!important}
+ .hero-water-motion,.hero-fabric-motion,.hero-water-reflection,.hero-air-trails{display:none!important}
+}
+
 /* V8 hero repair: never crop the name or displace the paired photographs.
  * The old full-frame distortion and duplicate-image warping have been removed. */
 .hero-photo{background-size:cover;background-position:center 50%;background-repeat:no-repeat}
