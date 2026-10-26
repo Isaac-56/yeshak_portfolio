@@ -222,14 +222,19 @@ function AllWork(){
  const stage=useRef<HTMLDivElement>(null);
  const position=useRef(0);
  const lockedUntil=useRef(0);
+ const exiting=useRef(false);
  const touchY=useRef<number|null>(null);
  const [imageStep,setImageStep]=useState(0);
  const count=projects.length;
+ const revealFooter=()=>{
+   exiting.current=true;
+   document.querySelector<HTMLElement>('footer.footer')?.scrollIntoView({behavior:reduceMotion()?'auto':'smooth',block:'start'});
+ };
  const stepTo=(next:number)=>{
    if(next<0||next>=count||next===position.current)return;
    setTravel(next>position.current?'forward':'backward');
    position.current=next;
-   lockedUntil.current=performance.now()+700;
+   lockedUntil.current=performance.now()+460;
    setActive(next);
  };
  useEffect(()=>{
@@ -239,17 +244,29 @@ function AllWork(){
    let lastWheelAt=0;
    let gestureConsumed=false;
    const wheel=(event:WheelEvent)=>{
-     if(event.ctrlKey)return; // Browser zoom is never intercepted.
+     if(event.ctrlKey)return; // Preserve pinch-to-zoom and browser zoom.
+     // Once the footer is revealed, let the page scroll normally until
+     // the visitor returns to the top of the gallery.
+     if(exiting.current){
+       if(window.scrollY<=2&&event.deltaY<0)exiting.current=false;
+       else return;
+     }
      const rect=el.getBoundingClientRect();
      if(rect.bottom<window.innerHeight*.46||rect.top>window.innerHeight*.54)return;
      if(event.deltaY===0)return;
      event.preventDefault();
      const now=performance.now();
-     if(now-lastWheelAt>320)gestureConsumed=false;
+     // A new, short deliberate gesture needs only a brief release, not
+     // a long wheel spin. Continuous trackpad inertia remains one gesture.
+     if(now-lastWheelAt>145)gestureConsumed=false;
      lastWheelAt=now;
-     if(Math.abs(event.deltaY)<7||gestureConsumed)return;
+     if(Math.abs(event.deltaY)<2||gestureConsumed)return;
      gestureConsumed=true;
      if(now<lockedUntil.current)return;
+     if(event.deltaY>0&&position.current===count-1){
+       revealFooter();
+       return;
+     }
      stepTo(position.current+(event.deltaY>0?1:-1));
    };
    const key=(event:KeyboardEvent)=>{
@@ -261,7 +278,12 @@ function AllWork(){
      if(event.key==='ArrowUp'||event.key==='ArrowLeft'||event.key==='PageUp')next=position.current-1;
      if(event.key==='Home')next=0;
      if(event.key==='End')next=count-1;
-     if(next===null||next<0||next>=count)return;
+     if(next===null||next<0)return;
+     if(next>=count){
+       event.preventDefault();
+       revealFooter();
+       return;
+     }
      event.preventDefault();stepTo(next);
    };
    const onTouchStart=(event:TouchEvent)=>{touchY.current=event.changedTouches[0]?.clientY??null};
@@ -270,7 +292,10 @@ function AllWork(){
      if(touchY.current===null)return;
      const delta=touchY.current-(event.changedTouches[0]?.clientY??touchY.current);
      touchY.current=null;
-     if(Math.abs(delta)>38 && performance.now()>=lockedUntil.current)stepTo(position.current+(delta>0?1:-1));
+     if(Math.abs(delta)>26 && performance.now()>=lockedUntil.current){
+       if(delta>0&&position.current===count-1)revealFooter();
+       else stepTo(position.current+(delta>0?1:-1));
+     }
    };
    window.addEventListener('wheel',wheel,{passive:false,capture:true});
    el.addEventListener('touchstart',onTouchStart,{passive:true});
@@ -357,7 +382,7 @@ function AllWork(){
      </nav>
      <div className="showcase-controls">
        {active===count-1
-          ?<button type="button" className="showcase-finish" onClick={()=>document.querySelector('.showcase-end')?.scrollIntoView({behavior:reduceMotion()?'auto':'smooth'})}>CONTINUE BELOW <ArrowDownRight size={16}/></button>
+          ?<button type="button" className="showcase-finish" onClick={revealFooter}>SCROLL TO CONTACT <ArrowDownRight size={16}/></button>
           :<span>SCROLL TO EXPLORE <ArrowDownRight size={16}/></span>}
        <div className="showcase-control-buttons">
          <button type="button" onClick={()=>stepTo(active-1)} disabled={active===0} aria-label="Previous project"><ArrowLeft size={19}/></button>
@@ -366,7 +391,6 @@ function AllWork(){
        </div>
      </div>
    </div>
-   <div className="showcase-end wrap"><span>THAT'S THE WORK. THE NEXT ONE COULD BE YOURS.</span><Link to="/contact">Let's create something together <ArrowUpRight size={24}/></Link></div>
  </main>;
 }
 function Phone({src,label,width,height,variant='phone'}:{src:string;label:string;width:number;height:number;variant?:'phone'|'tablet'}){
