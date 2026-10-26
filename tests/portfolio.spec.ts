@@ -315,22 +315,47 @@ test('last project scroll naturally reveals sole full-height footer CTA',async({
  await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Blog App');
 });
 
-test('mini preview matches the reference size and static case studies rotate frames',async({page})=>{
+test('cinematic mini previews are uncropped and use different content from project artwork',async({page})=>{
  await page.setViewportSize({width:1440,height:900});
  await page.goto('/work');
  await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.waitForTimeout(1150);
  const baby=page.locator('.showcase-current .showcase-small-preview');
  const box=await baby.boundingBox();
- expect(box?.width).toBeGreaterThan(245);
- expect(box?.height).toBeGreaterThan(135);
+ expect(box?.width).toBeGreaterThan(285);
+ expect(box?.height).toBeGreaterThan(170);
  await expect(baby.locator('video')).toHaveCount(1);
+ expect(await baby.locator('video').evaluate(el=>getComputedStyle(el).objectFit)).toBe('contain');
  for(const name of ['Medical App','DirectEd','Blog App','Sarabi Restaurant']){
    await page.getByRole('button',{name:'Show '+name}).click();
-   const mini=page.locator('.showcase-current .showcase-preview-slideshow img');
-   const first=await mini.getAttribute('src');
-   await expect(mini).not.toHaveAttribute('src',first||'',{timeout:4800});
-   await expect(page.locator('.showcase-current .showcase-swap-img').first()).toBeVisible();
+   const mini=page.locator('.showcase-current .showcase-preview-editorial img');
+   await expect(mini).toHaveCount(2);
+   const first=await mini.first().getAttribute('src');
+   const big=await page.locator('.showcase-current .showcase-feature img').evaluateAll(imgs=>imgs.map(el=>el.getAttribute('src')));
+   const small=await mini.evaluateAll(imgs=>imgs.map(el=>el.getAttribute('src')));
+   expect(small.every(src=>!big.includes(src))).toBe(true);
+   expect(await mini.first().evaluate(el=>getComputedStyle(el).objectFit)).toBe('contain');
+   await page.waitForTimeout(500);
+   await page.screenshot({path:'test-results/showcase-preview-'+name.toLowerCase().replace(/\s+/g,'-')+'.png'});
+   await expect(mini.first()).not.toHaveAttribute('src',first||'',{timeout:4800});
  }
  await page.getByRole('button',{name:'Show Baby Nest'}).click();
  await expect(page.locator('.showcase-current .showcase-small-preview video')).toBeVisible();
+});
+
+
+test('one small mouse-wheel notch advances without repeated scrolling',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.waitForTimeout(900);
+ await page.mouse.move(700,420);
+ await page.mouse.wheel(0,35);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+ await page.waitForTimeout(310);
+ await page.mouse.wheel(0,35);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Yene Bet');
+ await page.waitForTimeout(310);
+ await page.mouse.wheel(0,-35);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
 });
