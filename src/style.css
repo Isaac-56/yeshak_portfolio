@@ -739,13 +739,6 @@
 .showcase-control-buttons button:hover:not(:disabled){transform:scale(1.1)}
 .showcase-control-buttons button:disabled{opacity:.25;cursor:not-allowed}
 .showcase-control-buttons span{font-size:11px;white-space:nowrap}
-.showcase-end{
-  padding-block:78px 95px;display:flex;align-items:center;
-  justify-content:space-between;gap:30px;
-}
-.showcase-end>span{font-size:11px;letter-spacing:.13em;color:var(--muted)}
-.showcase-end>a{font:600 clamp(25px,3vw,44px)/1.2 'Manrope',sans-serif;letter-spacing:-.06em;display:flex;gap:16px;align-items:center}
-.showcase-end>a:hover{text-decoration:underline;text-underline-offset:8px}
 @media(max-width:1100px){
  .showcase-copy{width:49%;top:27%}
  .showcase-art-area{right:7%;width:47%;top:16%;bottom:11%}
@@ -790,8 +783,6 @@
  .showcase-control-buttons{gap:7px}
  .showcase-control-buttons button{width:29px;height:29px}
  .showcase-control-buttons span{font-size:9px}
- .showcase-end{align-items:flex-start;flex-direction:column;padding-block:65px}
- .showcase-end>a{font-size:24px}
 }
 @media(max-width:380px){
  .showcase-copy{top:17%}
@@ -925,3 +916,17 @@
 /* The bottom status row must not block project links above it. */
 .showcase-controls{pointer-events:none}
 .showcase-controls button{pointer-events:auto}
+
+/* Only one final invitation on Work: the site's existing footer.
+   It fills a viewport, so the last scroll clearly reveals Let's work together. */
+.app-root:has(.showcase-work-page) .footer{
+  min-height:100svh;
+  display:flex;
+  align-items:center;
+  box-sizing:border-box;
+}
+.app-root:has(.showcase-work-page) .footer>.wrap{width:min(calc(100% - 11%),1400px)}
+@media(max-width:720px){
+  .app-root:has(.showcase-work-page) .footer{min-height:100svh}
+  .app-root:has(.showcase-work-page) .footer>.wrap{width:calc(100% - 42px)}
+}
