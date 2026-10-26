@@ -198,3 +198,16 @@ test('contact form clearly explains provider errors instead of claiming success'
   await expect(page.locator('.contact-error')).toContainText('403',{timeout:10000});
   await expect(page.locator('.contact-success')).toHaveCount(0);
 });
+
+test('hero living motion stays layered within portrait and honors reduced motion',async ({page})=>{
+ await page.goto('/');
+ await expect(page.locator('.hero-living-elements')).toBeVisible();
+ await expect(page.locator('.hero-water-motion')).toHaveCount(2);
+ await expect(page.locator('.hero-fabric-motion')).toHaveCount(2);
+ const wave=await page.locator('.hero-water-light').evaluate(el=>getComputedStyle(el).animationName);
+ expect(wave).toContain('hero-wave-life');
+ await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
+ await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ await page.emulateMedia({reducedMotion:'reduce'});
+ await expect(page.locator('.hero-water-dark')).toBeHidden();
+});
