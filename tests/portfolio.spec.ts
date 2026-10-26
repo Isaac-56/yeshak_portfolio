@@ -276,3 +276,47 @@ test('site always opens in light mode even after a previously stored dark prefer
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
 });
+
+
+test('fast scroll cannot skip projects or escape the Work gallery to the footer',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.waitForTimeout(900);
+ await page.mouse.move(550,420);
+ await page.mouse.wheel(0,4800);
+ await page.mouse.wheel(0,6200); // Same fast trackpad gesture, not two projects.
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+ await page.waitForTimeout(1050);
+ expect(await page.evaluate(()=>window.scrollY)).toBeLessThan(4);
+ const stage=await page.locator('.showcase-stage').boundingBox();
+ expect(stage?.y).toBeGreaterThanOrEqual(-3);
+ await page.getByRole('button',{name:'Show Sarabi Restaurant'}).click();
+ await page.mouse.wheel(0,9000); // Terminal project also contains scroll.
+ await page.waitForTimeout(850);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Sarabi Restaurant');
+ expect(await page.evaluate(()=>window.scrollY)).toBeLessThan(4);
+ await expect(page.getByRole('button',{name:/Continue below/i})).toBeVisible();
+ await page.getByRole('button',{name:/Continue below/i}).click();
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:4000}).toBeGreaterThan(200);
+});
+
+test('mini preview matches the reference size and static case studies rotate frames',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ const baby=page.locator('.showcase-current .showcase-small-preview');
+ const box=await baby.boundingBox();
+ expect(box?.width).toBeGreaterThan(245);
+ expect(box?.height).toBeGreaterThan(135);
+ await expect(baby.locator('video')).toHaveCount(1);
+ for(const name of ['Medical App','DirectEd','Blog App','Sarabi Restaurant']){
+   await page.getByRole('button',{name:'Show '+name}).click();
+   const mini=page.locator('.showcase-current .showcase-preview-slideshow img');
+   const first=await mini.getAttribute('src');
+   await expect(mini).not.toHaveAttribute('src',first||'',{timeout:4800});
+   await expect(page.locator('.showcase-current .showcase-swap-img').first()).toBeVisible();
+ }
+ await page.getByRole('button',{name:'Show Baby Nest'}).click();
+ await expect(page.locator('.showcase-current .showcase-small-preview video')).toBeVisible();
+});
