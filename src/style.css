@@ -807,3 +807,12 @@
 /* Match the nav ink to the selected slide, including its theme variant. */
 .app-root:has(.showcase-work-page) .site-nav{color:var(--work-nav-light,var(--fg));transition:color .65s}
 :root[data-theme=dark] .app-root:has(.showcase-work-page) .site-nav{color:var(--work-nav-dark,#f5f1ec)}
+
+/* Reference-faithful thin progress bars: no native button background/borders. */
+.showcase-index button{
+  -webkit-appearance:none!important;appearance:none!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  border-radius:0!important;outline-offset:3px;padding:0!important;color:inherit;
+}
+.showcase-ghost{opacity:.21}
+:root[data-theme=dark] .showcase-ghost{opacity:.18}
