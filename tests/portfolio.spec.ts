@@ -199,39 +199,41 @@ test('contact form clearly explains provider errors instead of claiming success'
   await expect(page.locator('.contact-success')).toHaveCount(0);
 });
 
-test('hero living motion stays layered within portrait and honors reduced motion',async ({page})=>{
+
+test('hero image remains stable in both modes with overlay-only motion',async ({page})=>{
  await page.goto('/');
- await expect(page.locator('.hero-living-elements')).toHaveCount(1); // Motion fallback is hidden once GPU canvas is ready.
- await expect(page.locator('.hero-water-motion')).toHaveCount(2);
- await expect(page.locator('.hero-fabric-motion')).toHaveCount(2);
- const wave=await page.locator('.hero-water-light').evaluate(el=>getComputedStyle(el).animationName);
- expect(wave).toContain('hero-wave-life');
+ await expect(page.locator('canvas.hero-live-canvas')).toHaveCount(0);
+ await expect(page.locator('.hero-living-elements')).toHaveCount(0);
+ await expect(page.locator('.living-hero')).toBeVisible();
+ await expect(page.locator('.living-hero-sea')).toHaveCount(2);
+ await expect(page.locator('.living-hero-shirt')).toHaveCount(1);
+ const light=await page.locator('.light-scene').boundingBox();
+ const dark=await page.locator('.dark-scene').boundingBox();
+ expect(light).toEqual(dark);
+ const wave=await page.locator('.living-hero-sea-near').evaluate(el=>getComputedStyle(el).animationName);
+ expect(wave).toContain('living-hero-tide');
  await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+ await expect(page.locator('.living-hero')).toBeVisible();
  await page.emulateMedia({reducedMotion:'reduce'});
- await expect(page.locator('.hero-water-dark')).toBeHidden();
+ await expect(page.locator('.living-hero')).toBeHidden();
 });
 
-test('cinematic hero canvas animates without replacing the original fallback image',async ({page})=>{
-  await page.goto('/');
-  const canvas=page.locator('canvas.hero-live-canvas');
-  await expect(canvas).toHaveCount(1);
-  await expect(page.locator('.hero-photo')).toHaveCount(2);
-  const available=await page.evaluate(()=>{
-    try {const c=document.createElement('canvas');return Boolean(c.getContext('webgl'));}catch{return false;}
-  });
-  if(available){
-    await expect(canvas).toHaveAttribute('data-ready','true',{timeout:15000});
-    const pixels=await canvas.evaluate((el)=>{
-      const c=el as HTMLCanvasElement;
-      return {width:c.width,height:c.height,visible:getComputedStyle(c).opacity};
-    });
-    expect(pixels.width).toBeGreaterThan(500);
-    expect(pixels.height).toBeGreaterThan(300);
-  }
-  await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
-  await expect(canvas).toHaveCount(1);
-  await page.emulateMedia({reducedMotion:'reduce'});
-  await expect(canvas).toBeHidden();
+test('full Yeshak Tsegaye hero heading never clips off either viewport edge',async ({page})=>{
+ for(const viewport of [{width:1290,height:900},{width:1440,height:900},{width:768,height:950},{width:390,height:844},{width:360,height:780}]){
+   await page.setViewportSize(viewport);
+   await page.goto('/');
+   await expect(page.locator('.hero-title')).toBeVisible();
+   await page.waitForTimeout(2400);
+   const result=await page.locator('.hero-title').evaluate(el=>{
+     const heading=el.getBoundingClientRect();
+     const text=(el.querySelector('span')||el).getBoundingClientRect();
+     return {outerLeft:heading.left,outerRight:heading.right,textLeft:text.left,textRight:text.right,viewport:window.innerWidth,scrollWidth:document.documentElement.scrollWidth};
+   });
+   expect(result.outerLeft,`Hero heading overflows left at ${viewport.width}`).toBeGreaterThanOrEqual(-2);
+   expect(result.outerRight,`Hero heading overflows right at ${viewport.width}`).toBeLessThanOrEqual(result.viewport+2);
+   expect(result.textLeft,`Name text clips at left edge at ${viewport.width}`).toBeGreaterThanOrEqual(-2);
+   expect(result.textRight,`Name text clips at right edge at ${viewport.width}`).toBeLessThanOrEqual(result.viewport+2);
+   expect(result.scrollWidth,`Horizontal overflow at ${viewport.width}`).toBeLessThanOrEqual(result.viewport+2);
+ }
 });
