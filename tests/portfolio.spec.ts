@@ -278,27 +278,41 @@ test('site always opens in light mode even after a previously stored dark prefer
 });
 
 
-test('fast scroll cannot skip projects or escape the Work gallery to the footer',async({page})=>{
+test('short scroll gestures navigate promptly without skipping projects',async({page})=>{
  await page.setViewportSize({width:1440,height:900});
  await page.goto('/work');
  await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
  await page.waitForTimeout(900);
  await page.mouse.move(550,420);
  await page.mouse.wheel(0,4800);
- await page.mouse.wheel(0,6200); // Same fast trackpad gesture, not two projects.
+ await page.mouse.wheel(0,6200); // The same fast gesture must not skip.
  await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
- await page.waitForTimeout(1050);
+ await page.waitForTimeout(560); // Brief release, no extended scrolling.
+ await page.mouse.wheel(0,95); // A small deliberate gesture advances.
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Yene Bet');
  expect(await page.evaluate(()=>window.scrollY)).toBeLessThan(4);
- const stage=await page.locator('.showcase-stage').boundingBox();
- expect(stage?.y).toBeGreaterThanOrEqual(-3);
+});
+
+test('last project scroll naturally reveals sole full-height footer CTA',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await expect(page.locator('.showcase-end')).toHaveCount(0);
+ await expect(page.getByRole('link',{name:/Let's create something together/i})).toHaveCount(0);
+ await expect(page.getByRole('link',{name:/Let's work together/i})).toHaveCount(1);
  await page.getByRole('button',{name:'Show Sarabi Restaurant'}).click();
- await page.mouse.wheel(0,9000); // Terminal project also contains scroll.
- await page.waitForTimeout(850);
  await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Sarabi Restaurant');
- expect(await page.evaluate(()=>window.scrollY)).toBeLessThan(4);
- await expect(page.getByRole('button',{name:/Continue below/i})).toBeVisible();
- await page.getByRole('button',{name:/Continue below/i}).click();
- await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:4000}).toBeGreaterThan(200);
+ await page.waitForTimeout(550);
+ await page.mouse.move(600,430);
+ await page.mouse.wheel(0,120); // One further scroll takes the user to contact.
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:5000}).toBeGreaterThan(400);
+ await expect(page.locator('.footer-top a')).toBeInViewport();
+ const box=await page.locator('footer.footer').boundingBox();
+ expect(box?.height).toBeGreaterThanOrEqual(890);
+ await page.evaluate(()=>window.scrollTo(0,0));
+ await page.waitForTimeout(500);
+ await page.mouse.wheel(0,-170); // Navigating backward from the end is possible.
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Blog App');
 });
 
 test('mini preview matches the reference size and static case studies rotate frames',async({page})=>{
