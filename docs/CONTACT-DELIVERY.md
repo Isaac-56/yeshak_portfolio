@@ -33,3 +33,11 @@ It displays delivery confirmation **only** after EmailJS returns success.
 When delivery is blocked, the draft is preserved and the visitor can choose **Open your email app with this message** as an explicit manual fallback.
 
 The repository includes a one-time provider diagnostic workflow, which failed at the provider with 412. Its failure is expected until Gmail has been reauthorized. Ordinary production and browser tests mock EmailJS responses so they do not send repeated mail.
+
+## Resolution verified — 2026-10-26
+
+The EmailJS Gmail service was disconnected and reconnected by the account owner. The same existing EmailJS service and template then passed a real send test in GitHub Actions (rerun of job 40280639083): **HTTP 200, response OK**. The owner independently confirmed that the test email arrived in the destination inbox.
+
+**Provider-level delivery is now verified.** The previous error 412 is resolved. No Gmail password or private credentials were added to the repository. The remaining check is an in-browser submission from the actual Contact page at http://localhost:5173/contact, verifying the success UI, sent content, and reply-to address.
+
+The troubleshooting steps earlier in this document are retained for reference if Gmail authorization expires again.
