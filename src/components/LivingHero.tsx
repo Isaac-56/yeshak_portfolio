@@ -224,10 +224,10 @@ export default function LivingHero() {
       const target=document.documentElement.dataset.theme==='dark'?1:0;
       blend+=(target-blend)*.055;
       const duration=now/1000;
-      gl.uniform1f(state.time,duration);
-      gl.uniform1f(state.dark,blend);
-      gl.uniform2f(state.resolution,canvas!.width,canvas!.height);
-      gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+      gl!.uniform1f(state!.time,duration);
+      gl!.uniform1f(state!.dark,blend);
+      gl!.uniform2f(state!.resolution,canvas!.width,canvas!.height);
+      gl!.drawArrays(gl!.TRIANGLE_STRIP,0,4);
       if(firstFrame){canvas!.dataset.ready='true';firstFrame=false;}
     }
     raf=requestAnimationFrame(render);
