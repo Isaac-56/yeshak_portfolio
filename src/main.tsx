@@ -193,15 +193,15 @@ function Works({featuredOnly=false,explorationsOnly=false}:{featuredOnly?:boolea
  </section>}
 // Choose genuinely legible portfolio frames for the angled project artwork.
 const showcaseFeatureScreens:Record<string,[number,number,number]>={
- 'baby-nest':[7,8,6],
+ 'baby-nest':[13,14,16],
  'reclaim':[1,2,3],
- 'yenebet':[1,6,7],
- 'medical-app':[1,2,3],
+ 'yenebet':[1,14,16],
+ 'medical-app':[10,12,14],
  'directed':[3,2,4],
  'blog-app':[10,2,4]
 };
 const showcaseStaticSequences:Record<string,number[]>={
-  'medical-app':[1,4,8,12,17,25,32],
+  'medical-app':[10,11,12,13,14,15,16,17,18],
   'directed':[3,7,9,15,22,28,36],
   'blog-app':[10,4,8,12,16,18,2],
   'sarabi':[1,5,9,13,7,11,3]
@@ -386,7 +386,7 @@ function AllWork(){
              <div className="showcase-ghost showcase-ghost-top"><img src={imageFor(prev.slug,prev.slug==='sarabi'?1:2)} alt="" loading="lazy"/></div>
              <div className="showcase-feature" style={{background:p.accent}}>
                {p.slug==='sarabi'
-                 ?<div className="showcase-feature-browser"><img key={p.slug+'-browser-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,dynamicScreen(0))} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/></div>
+                 ?<div className="showcase-feature-browser"><img className="showcase-sarabi-site-pan" src={imageFor(p.slug,1)} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/></div>
                  :<div className="showcase-phones">
                     {[0,1,2].map(offset=><div className={'showcase-phone showcase-phone-'+offset} key={offset}>
                       <img key={p.slug+'-'+offset+'-'+(selected?imageStep:0)} className={selected&&sequence?'showcase-swap-img':''} src={imageFor(p.slug,dynamicScreen(offset))} alt="" loading={Math.abs(i-active)<=1?'eager':'lazy'}/>
