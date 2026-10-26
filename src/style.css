@@ -930,3 +930,96 @@
   .app-root:has(.showcase-work-page) .footer{min-height:100svh}
   .app-root:has(.showcase-work-page) .footer>.wrap{width:calc(100% - 42px)}
 }
+
+
+/* WORK V4 — fast, distinct interactions and a deliberately composed,
+   uncropped editorial companion preview. */
+.showcase-small-preview{
+  width:clamp(292px,24vw,370px);
+  height:clamp(176px,21vh,232px);
+  max-height:none;
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:10px;
+  background:#1c232c;
+  box-shadow:0 20px 45px #0b151e48,0 0 0 1px #0002;
+  overflow:hidden;
+  pointer-events:none;
+}
+.showcase-preview-film,
+.showcase-preview-editorial{
+  position:relative;width:100%;height:100%;isolation:isolate;
+  overflow:hidden;
+}
+.showcase-preview-film{
+  display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 45%,#40434f 0%,#151921 84%);
+}
+.showcase-preview-film video{
+  position:relative;display:block;
+  width:100%;height:100%;
+  object-fit:contain!important;
+  object-position:center;
+  background:transparent;
+}
+.showcase-preview-editorial{
+  display:flex;align-items:center;justify-content:center;
+  gap:18px;
+  background:
+    radial-gradient(circle at 74% 15%,#d8dbf026,transparent 53%),
+    linear-gradient(135deg,#343b46,#131b27);
+}
+.showcase-preview-editorial::before{
+  content:"";position:absolute;inset:15px;
+  border:1px solid #ffffff21;border-radius:8px;
+  pointer-events:none;
+}
+.showcase-preview-device{
+  width:29%;height:79%;z-index:1;position:relative;
+  border:3px solid #0c1018;border-radius:9px;
+  background:#edeef2;
+  overflow:hidden;
+  box-shadow:0 16px 25px #0005;
+  transform:rotate(-8deg) translateY(7px);
+}
+.showcase-preview-device-alt{
+  transform:rotate(9deg) translateY(-4px);
+}
+.showcase-preview-device img{
+  display:block;width:100%;height:100%;
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#f0eff0;
+}
+.showcase-preview-device img.showcase-swap-img{
+  animation:showcase-preview-enter .74s cubic-bezier(.2,.8,.2,1) both;
+}
+.showcase-preview-tag{
+  position:absolute;top:13px;left:15px;z-index:3;
+  color:#fff8;font:600 8px/1.2 'DM Sans',sans-serif;letter-spacing:.14em;
+}
+.showcase-small-preview>.showcase-preview-caption{
+  z-index:4;position:absolute;bottom:0;left:0;right:0;
+  padding:25px 13px 10px;
+  text-transform:uppercase;letter-spacing:.09em;
+  font:600 10px/1.3 'DM Sans',sans-serif;
+  color:#f9f6f1;
+  background:linear-gradient(transparent,#111925c9);
+  pointer-events:none;
+  text-shadow:0 2px 5px #0008;
+}
+.showcase-phones .showcase-phone img{
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#f0efed;
+}
+.showcase-feature-browser img{
+  object-fit:contain!important;
+  object-position:center!important;
+  background:#ede6dd;
+}
+@media(max-width:1100px) and (min-width:751px){
+  .showcase-small-preview{width:clamp(240px,24vw,310px);height:clamp(151px,19vh,204px)}
+}
+@media(max-width:750px){
+  .showcase-small-preview{display:none}
+}
