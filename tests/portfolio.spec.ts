@@ -42,9 +42,12 @@ test('full-screen work gallery changes project scenes through controls and keybo
   await expect(page.locator('.archive-panel')).toHaveCount(7);
   await expect(page.locator('.showcase-index button')).toHaveCount(7);
   await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Baby Nest');
+  await page.screenshot({path:'test-results/showcase-babynest-desktop.png'});
   await expect(page.locator('.showcase-slide.showcase-current .showcase-phones img')).toHaveCount(3);
   await page.getByRole('button',{name:'Next project'}).click();
   await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+  await page.waitForTimeout(850);
+  await page.screenshot({path:'test-results/showcase-reclaim-desktop.png'});
   await page.keyboard.press('ArrowRight');
   await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Yene Bet');
   await page.getByRole('button',{name:'Show Sarabi Restaurant'}).click();
@@ -66,6 +69,7 @@ test('cinematic work gallery scroll, theme switch and small viewport layout',asy
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await page.setViewportSize({width:390,height:844});
   await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toBeVisible();
+  await page.screenshot({path:'test-results/showcase-mobile-dark.png'});
   const width=await page.evaluate(()=>({page:document.documentElement.scrollWidth,window:innerWidth}));
   expect(width.page).toBeLessThanOrEqual(width.window+2);
   await page.getByRole('button',{name:'Next project'}).click();
