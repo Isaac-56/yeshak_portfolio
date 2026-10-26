@@ -183,7 +183,53 @@ function Works({featuredOnly=false,explorationsOnly=false}:{featuredOnly?:boolea
  <div className={`work-grid ${featuredOnly?'work-grid-featured':''}`}>{ps.map((p,i)=><WorkCard p={p} index={projects.indexOf(p)} key={p.slug}/>)}</div>
  {featuredOnly&&<div className="work-more"><Link data-magnetic to="/work">Explore every project <ArrowUpRight size={20}/></Link></div>}
  </section>}
-function AllWork(){return <main className="inner-page"><header className="page-header wrap" data-reveal><span className="section-kicker">Designs, studies & experiments — 2026</span><h1>Selected <em>work.</em></h1><p>Three favorite projects in motion, followed by four detailed interface explorations. Open any project for its complete screen gallery.</p></header><Works featuredOnly/><Works explorationsOnly/></main>}
+function AllWork(){
+ const [active,setActive]=useState(0);
+ const panels=useRef<Array<HTMLElement|null>>([]);
+ useEffect(()=>{
+   const io=new IntersectionObserver(entries=>{
+     const visible=entries.filter(x=>x.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
+     if(visible[0]){
+       const index=Number((visible[0].target as HTMLElement).dataset.projectIndex);
+       if(Number.isInteger(index))setActive(index);
+     }
+   },{rootMargin:'-20% 0px -25% 0px',threshold:[.1,.25,.5,.75]});
+   panels.current.forEach(el=>{if(el)io.observe(el)});
+   return()=>io.disconnect();
+ },[]);
+ return <main className="work-archive inner-page">
+   <section className="archive-intro wrap">
+     <div className="archive-kicker" data-reveal><span>Independent designer & developer</span><span>Portfolio / 2026</span></div>
+     <h1 data-reveal>All <em>the work.</em><span className="archive-title-count">{String(projects.length).padStart(2,'0')}</span></h1>
+     <div className="archive-intro-bottom" data-reveal><p>Seven ideas, seven different worlds. Explore the work through a living gallery—and enter each case study for the complete story.</p><a href="#archive-project-1">Scroll to discover <ArrowDownRight size={20}/></a></div>
+   </section>
+   <nav className="archive-rail" aria-label="Jump to a portfolio project">
+     <span className="archive-rail-caption">INDEX</span>
+     {projects.map((p,i)=><a key={p.slug} href={`#archive-project-${i+1}`} className={active===i?'active':''} aria-label={`Jump to ${p.name}`} aria-current={active===i?'location':undefined}><span>{String(i+1).padStart(2,'0')}</span><span className="archive-rail-label">{p.name}</span></a>)}
+   </nav>
+   <div className="archive-projects">
+     {projects.map((p,i)=><section id={`archive-project-${i+1}`} className={`archive-panel archive-panel-${i%2?'reverse':'normal'} ${p.video?'archive-panel-film':'archive-panel-static'}`} data-project-index={i} key={p.slug} ref={el=>{panels.current[i]=el;}} style={{'--archive-accent':p.accent} as React.CSSProperties}>
+       <div className="archive-panel-backdrop" aria-hidden="true"><span>{String(i+1).padStart(2,'0')}</span></div>
+       <div className="archive-panel-layout wrap">
+         <div className="archive-panel-copy">
+           <span className="archive-panel-counter"><span>{String(i+1).padStart(2,'0')} / {String(projects.length).padStart(2,'0')}</span><span>{p.featured?'Selected favorites / Motion':'Design exploration / Interface'}</span></span>
+           <h2>{p.name}<span className="archive-name-dot">.</span></h2>
+           <p className="archive-panel-subtitle">{p.label}</p>
+           <p className="archive-panel-summary">{p.overview}</p>
+           <div className="archive-panel-meta"><span>{p.kind}</span><span>{p.year}</span><span>{frames[p.slug]?.length||0} original screens</span></div>
+           <Link className="archive-open-project" to={`/work/${p.slug}`} aria-label={`Explore ${p.name} case study`}>Explore case study <ArrowUpRight size={25}/></Link>
+         </div>
+         <div className="archive-panel-visual" style={{background:p.accent}}>
+           {p.video?<PreviewVideo p={p}/>:<CoverDevices p={p}/>}
+           <span className="archive-panel-visual-label">{p.featured?'Motion preview':'Interface preview'} <span>↗</span></span>
+         </div>
+       </div>
+       <span className="archive-panel-bottom-index">{String(i+1).padStart(2,'0')} — {String(projects.length).padStart(2,'0')}</span>
+     </section>)}
+   </div>
+   <div className="archive-end wrap"><span>You've seen the work.</span><Link to="/contact">Let's make something next. <ArrowUpRight/></Link></div>
+ </main>;
+}
 function Phone({src,label,width,height,variant='phone'}:{src:string;label:string;width:number;height:number;variant?:'phone'|'tablet'}){
  const pane=useRef<HTMLDivElement>(null);
  const pause=useRef(false);
