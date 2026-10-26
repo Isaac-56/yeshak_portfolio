@@ -1,17 +1,96 @@
-/* GPU hero animation is painted only after both original paired artworks load.
-   Static layers remain underneath for unsupported browsers and reduced motion. */
-.hero-live-canvas{
-  position:absolute;inset:0;z-index:1;width:100%;height:100%;
-  display:block;opacity:0;pointer-events:none;
-  transition:opacity .8s ease;
+/* Preserve the approved hero photos as the only full-frame image.
+ * All motion is translucent light, never image coordinate displacement. */
+.living-hero {
+  position:absolute; inset:0; z-index:1;
+  overflow:hidden; isolation:isolate; pointer-events:none;
+  --shore-light:rgba(255,228,168,.28);
+  --shore-gloss:rgba(255,248,212,.18);
+  --shirt-gloss:rgba(250,233,214,.18);
 }
-.hero-live-canvas[data-ready="true"]{opacity:1}
-.hero:has(.hero-live-canvas[data-ready="true"]) .hero-living-elements{opacity:0}
-.hero-living-elements{transition:opacity .6s;z-index:1}
+:root[data-theme="dark"] .living-hero {
+  --shore-light:rgba(249,112,211,.30);
+  --shore-gloss:rgba(178,131,255,.24);
+  --shirt-gloss:rgba(201,142,255,.21);
+}
+/* Lower-right surf only: the top sky, portrait and horizon are untouched. */
+.living-hero-sea {
+  position:absolute; inset:0;
+  -webkit-mask-image:radial-gradient(ellipse 46% 34% at 80% 69%, #000 0 45%, #000a 60%, transparent 88%);
+  mask-image:radial-gradient(ellipse 46% 34% at 80% 69%, #000 0 45%, #000a 60%, transparent 88%);
+  background:
+    repeating-linear-gradient(171deg,
+      transparent 0 19px,
+      var(--shore-light) 23px 26px,
+      transparent 30px 51px,
+      var(--shore-gloss) 54px 56px,
+      transparent 61px 83px);
+  opacity:.37;
+  will-change:transform,opacity;
+  animation:living-hero-tide 7.5s ease-in-out infinite alternate;
+}
+.living-hero-sea-far {
+  opacity:.17;
+  background:
+    repeating-linear-gradient(177deg,
+      transparent 0 28px,var(--shore-gloss) 30px 32px,transparent 36px 67px);
+  animation-duration:11s;
+  animation-direction:alternate-reverse;
+}
+/* A soft band of highlights traveling across the beach water. */
+.living-hero-glimmer {
+  position:absolute; right:0; top:37%; width:54%; height:49%;
+  background:linear-gradient(106deg,
+    transparent 17%,var(--shore-gloss) 39%,transparent 57%,
+    var(--shore-light) 72%,transparent 88%);
+  -webkit-mask-image:radial-gradient(ellipse 78% 67% at 60% 62%,#0005,transparent 88%);
+  mask-image:radial-gradient(ellipse 78% 67% at 60% 62%,#0005,transparent 88%);
+  mix-blend-mode:screen;
+  opacity:.3;filter:blur(9px);
+  animation:living-hero-shine 9s ease-in-out infinite;
+}
+/* Shimmer inside shirt only. This animates light on fabric, not the body outline. */
+.living-hero-shirt {
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(125deg,
+     transparent 0 15px,var(--shirt-gloss) 17px 21px,transparent 27px 46px);
+  -webkit-mask-image:radial-gradient(ellipse 6.5% 11% at 48% 36%,#0006 0%,#0002 53%,transparent 92%);
+  mask-image:radial-gradient(ellipse 6.5% 11% at 48% 36%,#0006 0%,#0002 53%,transparent 92%);
+  opacity:.36;
+  animation:living-hero-shirt-wind 5.8s ease-in-out infinite;
+}
+.living-hero-breeze {
+  position:absolute;left:40%;top:14%;height:38%;width:28%;
+  background:linear-gradient(105deg,transparent 10%,#ffffff25 55%,transparent 87%);
+  filter:blur(45px);opacity:0;pointer-events:none;
+  animation:living-hero-air 14s ease-in-out infinite;
+}
+@keyframes living-hero-tide {
+  0% {transform:translate3d(-4px,1px,0);opacity:.21}
+  48% {transform:translate3d(9px,-8px,0);opacity:.4}
+  100% {transform:translate3d(-3px,5px,0);opacity:.28}
+}
+@keyframes living-hero-shine {
+  0%,100% {transform:translate3d(-9px,4px,0);opacity:.19}
+  50% {transform:translate3d(21px,-9px,0);opacity:.48}
+}
+@keyframes living-hero-shirt-wind {
+  0%,100% {background-position:0 0;opacity:.18}
+  45% {background-position:8px -6px;opacity:.47}
+  75% {background-position:-4px 3px;opacity:.32}
+}
+@keyframes living-hero-air {
+  0%,100% {transform:translate3d(-20px,0,0);opacity:0}
+  42% {opacity:.11}
+  70% {transform:translate3d(100px,-15px,0);opacity:0}
+}
 .hero-shade{z-index:2}
 .hero-birds{z-index:3}
 .hero-corner,.hero-side-label,.hero-title-wrap{z-index:4}
+@media(max-width:720px) {
+ .living-hero-shirt{opacity:.24}
+ .living-hero-sea{opacity:.25}
+ .living-hero-glimmer{opacity:.22}
+}
 @media(prefers-reduced-motion:reduce){
-  .hero-live-canvas{display:none!important}
-  .hero-living-elements{display:none!important}
+ .living-hero{display:none!important}
 }
