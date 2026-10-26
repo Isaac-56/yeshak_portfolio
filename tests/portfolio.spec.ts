@@ -238,7 +238,7 @@ test('site always opens in light mode even after a previously stored dark prefer
   });
   await page.goto('/');
   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
-  await expect(page.locator('html')).toHaveAttribute('style',/color-scheme:\\s*light/i);
+  await expect(page.locator('html')).toHaveCSS('color-scheme','light');
   await page.getByRole('button',{name:/Activate illustrated night mode/}).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
   await page.reload();
