@@ -5,9 +5,9 @@ import { ArrowLeft, ArrowUpRight, CheckCircle2, Clock3, Github, Linkedin, Mail, 
 
 // Same EmailJS service and template used by the original portfolio on main.
 // These are EmailJS client/public identifiers, not server-side credentials.
-const EMAILJS_SERVICE_ID = 'service_wkr4ycf';
-const EMAILJS_TEMPLATE_ID = 'template_rmpnv3v';
-const EMAILJS_PUBLIC_KEY = 'TfbfQ3ravn1_lPIRc';
+const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_wkr4ycf';
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_rmpnv3v';
+const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'TfbfQ3ravn1_lPIRc';
 
 const contactMethods = [
   { label: 'Email', value: 'yeshak34@gmail.com', href: 'mailto:yeshak34@gmail.com', icon: Mail },
@@ -24,22 +24,53 @@ export default function ContactPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (sending || !formRef.current) return;
+    const fields = new FormData(formRef.current);
+    const name = String(fields.get('user_name') || '').trim();
+    const email = String(fields.get('user_email') || '').trim();
+    const subject = String(fields.get('subject') || '').trim();
+    const message = String(fields.get('message') || '').trim();
+    if (!name || !email || !subject || !message) {
+      setError('Please complete all four fields.');
+      return;
+    }
     setSending(true);
     setError('');
     try {
-      // Preserve the exact EmailJS template fields from the working main-branch form.
-      const result = await emailjs.sendForm(
+      // Support the original main-branch variable names AND standard EmailJS
+      // templates. Recipient stays configured in the EmailJS template itself.
+      const params = {
+        user_name: name, user_email: email, subject, message,
+        from_name: name, from_email: email, reply_to: email,
+        name, email, title: subject,
+        to_name: 'Yeshak',
+        time: new Date().toLocaleString('en-US', { timeZone: 'Africa/Addis_Ababa' })
+      };
+      const response = await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
-        formRef.current,
-        { publicKey: EMAILJS_PUBLIC_KEY },
+        params,
+        { publicKey: EMAILJS_PUBLIC_KEY }
       );
-      if (result.status !== 200) throw new Error('Email service returned an unsuccessful status');
+      if (response.status !== 200) throw response;
       formRef.current?.reset();
       setSent(true);
     } catch (cause) {
-      console.error('EmailJS contact form failed:', cause);
-      setError('Your message could not be sent. Please try again, or email me directly.');
+      // EmailJS errors expose 'status' and 'text'; preserve the actual reason
+      // instead of disguising every failure as "use direct email".
+      const details = cause as { status?: number; text?: string; message?: string };
+      const status = typeof details?.status === 'number' ? details.status : 0;
+      const text = String(details?.text || details?.message || '').slice(0, 220);
+      if (status === 403) {
+        setError('Email delivery was blocked by the email service (403). The service account, origin allowlist or CAPTCHA settings need checking. Your message has not been sent.');
+      } else if (status === 400 || status === 404 || status === 422) {
+        setError(`Email service configuration needs attention (error ${status}${text ? `: ${text}` : ''}). Your message has not been sent.`);
+      } else if (status === 429) {
+        setError('Too many messages have been sent recently. Please retry in a minute.');
+      } else {
+        setError(`The mail service could not deliver your message${status ? ` (error ${status})` : ''}. Please try again. Your message has not been sent.`);
+      }
+      // Log status only; never print private contact message contents.
+      console.error('EmailJS delivery failure', { status, reason: text });
     } finally {
       setSending(false);
     }
