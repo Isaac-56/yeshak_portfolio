@@ -48,7 +48,7 @@ function Cursor(){
   return <div ref={dot} className="cursor-orb" data-active="false" aria-hidden="true">View</div>;
 }
 function App(){
-  const [theme,setTheme]=useState<Theme>(()=>{try {return localStorage.getItem('yt-theme-final')==='dark'?'dark':'light';}catch{return'light'}});
+  const [theme,setTheme]=useState<Theme>('light'); // Every fresh page load starts in light mode.
   const [menu,setMenu]=useState(false);
   const [loader,setLoader]=useState(!reduceMotion());
   const navigate=useNavigate();
@@ -79,7 +79,7 @@ function App(){
   const location=useLocation();const path=location.pathname;
   useScrollReveal(path);useMagnetic(path);
   useLayoutEffect(()=>{window.scrollTo(0,0);setMenu(false);},[path]);
-  useEffect(()=>{document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;try{localStorage.setItem('yt-theme-final',theme)}catch{}},[theme]);
+  useLayoutEffect(()=>{document.documentElement.dataset.theme=theme;document.documentElement.style.colorScheme=theme;},[theme]);
   useEffect(()=>{const timer=window.setTimeout(()=>setLoader(false),1150);return()=>clearTimeout(timer)},[]);
   useEffect(()=>{document.body.style.overflow=menu?'hidden':'';return()=>{document.body.style.overflow=''}},[menu]);
   useEffect(()=>{
