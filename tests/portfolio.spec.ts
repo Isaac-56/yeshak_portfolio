@@ -359,3 +359,46 @@ test('one small mouse-wheel notch advances without repeated scrolling',async({pa
  await page.mouse.wheel(0,-35);
  await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
 });
+
+test('upward wheel reverses immediately even while previous slide is settling',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.waitForTimeout(950);
+ await page.mouse.move(640,450);
+ await page.mouse.wheel(0,85);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+ // Do not pause for 800ms and do not drag the scrollbar.
+ await page.mouse.wheel(0,-45);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Baby Nest',{timeout:1700});
+ await page.waitForTimeout(200);
+ await page.mouse.wheel(0,45);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+ await page.waitForTimeout(210);
+ await page.mouse.wheel(0,45);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Yene Bet');
+ await page.mouse.wheel(0,-35);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+ expect(await page.evaluate(()=>scrollY)).toBeLessThan(5);
+});
+
+test('normal upward wheel at the footer returns to Sarabi then previous project',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.getByRole('button',{name:'Show Sarabi Restaurant'}).click();
+ await page.waitForTimeout(310);
+ await page.mouse.move(580,430);
+ await page.mouse.wheel(0,120);
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:5000}).toBeGreaterThan(450);
+ await expect(page.locator('.footer-top a')).toBeInViewport();
+ // This must work with the mouse wheel; no dragging the right scrollbar.
+ await page.mouse.move(680,450);
+ await page.mouse.wheel(0,-90);
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:5000}).toBeLessThan(8);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Sarabi Restaurant');
+ await page.waitForTimeout(200);
+ await page.mouse.wheel(0,-90);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Blog App');
+ expect(await page.evaluate(()=>scrollY)).toBeLessThan(8);
+});
