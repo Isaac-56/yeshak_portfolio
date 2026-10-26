@@ -1042,3 +1042,25 @@
 @media(prefers-reduced-motion:reduce){
   .showcase-feature-browser img.showcase-sarabi-site-pan{animation:none!important}
 }
+
+/* Work scroll directional polish: match the shorter, reversible wheel gesture.
+   Large + small artwork both settle before the next physical wheel notch. */
+.showcase-slide.archive-panel{
+  transition:transform .62s cubic-bezier(.22,1,.36,1),opacity .39s ease,visibility 0s .62s;
+}
+.showcase-slide.showcase-current{
+  transition:transform .62s cubic-bezier(.22,1,.36,1),opacity .46s ease,visibility 0s;
+}
+.showcase-copy{
+  transition:transform .55s cubic-bezier(.22,1,.36,1),opacity .37s ease;
+}
+.showcase-visual-rail{
+  transition:transform .62s cubic-bezier(.22,1,.36,1),opacity .48s ease;
+}
+.showcase-feature{
+  transition:transform .66s cubic-bezier(.22,1,.36,1);
+}
+@media(prefers-reduced-motion:reduce){
+ .showcase-slide.archive-panel,.showcase-slide.showcase-current,
+ .showcase-copy,.showcase-visual-rail,.showcase-feature{transition:none!important}
+}
