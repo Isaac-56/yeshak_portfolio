@@ -94,3 +94,32 @@
 @media(prefers-reduced-motion:reduce){
  .living-hero{display:none!important}
 }
+
+/* V9: actual animated water crests drawn independently of the photo.
+   The canvas is clipped to the shallow-water region in JavaScript. */
+.living-hero-water-canvas {
+  display:block;
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  z-index:2;
+  opacity:1;
+  pointer-events:none;
+  mix-blend-mode:screen;
+  filter:drop-shadow(0 0 3px rgba(255,225,185,.16));
+}
+:root[data-theme="dark"] .living-hero-water-canvas {
+  filter:drop-shadow(0 0 6px rgba(225,145,255,.24));
+}
+.living-hero-sea-near {
+  z-index:1;
+  opacity:.20;
+}
+.living-hero-glimmer {z-index:1;opacity:.36}
+.living-hero-shirt,.living-hero-breeze{z-index:3}
+@media(max-width:720px){
+ .living-hero-water-canvas{opacity:.85}
+ .living-hero-sea-near{opacity:.15}
+}
+@media(prefers-reduced-motion:reduce){
+ .living-hero-water-canvas{display:none!important}
+}
