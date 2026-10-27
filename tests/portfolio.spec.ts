@@ -39,7 +39,7 @@ test('animated menu, keyboard navigation and route transitions', async ({page}) 
 test('full-screen work gallery changes project scenes through controls and keyboard', async ({page}) => {
   await page.setViewportSize({width:1440,height:900});
   await page.goto('/work');
-  await expect(page.locator('.archive-panel')).toHaveCount(7);
+  await expect(page.locator('.archive-panel')).toHaveCount(2); // Active + next only, no seven media-heavy hidden scenes.
   await expect(page.locator('.showcase-index button')).toHaveCount(7);
   await expect(page.locator('.showcase-slide.showcase-current .showcase-project-name')).toHaveText('Baby Nest');
   await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
@@ -401,4 +401,61 @@ test('normal upward wheel at the footer returns to Sarabi then previous project'
  await page.mouse.wheel(0,-90);
  await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Blog App');
  expect(await page.evaluate(()=>scrollY)).toBeLessThan(8);
+});
+
+
+test('every project responds to short wheel gestures in both directions with visible motion',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.waitForTimeout(1000);
+ const names=['Baby Nest','Reclaim','Yene Bet','Medical App','DirectEd','Blog App','Sarabi Restaurant'];
+ await page.mouse.move(660,425);
+ for(let i=1;i<names.length;i++){
+   await page.mouse.wheel(0,45);
+   await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText(names[i]);
+   // Every chapter should have an active moving hero and a rendered preview.
+   const animation=await page.locator('.showcase-current .showcase-visual-rail').evaluate(el=>getComputedStyle(el).animationName);
+   expect(animation).toContain('showcase-rail-from-bottom');
+   await expect(page.locator('.showcase-current .showcase-small-preview')).toBeVisible();
+   await page.waitForTimeout(275);
+   if(i===2||i===4||i===5)await page.screenshot({path:'test-results/showcase-project-'+names[i].toLowerCase().replace(/\s+/g,'-')+'.png'});
+ }
+ for(let i=names.length-2;i>=0;i--){
+   await page.mouse.wheel(0,-45);
+   await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText(names[i]);
+   const animation=await page.locator('.showcase-current .showcase-visual-rail').evaluate(el=>getComputedStyle(el).animationName);
+   expect(animation).toContain('showcase-rail-from-top');
+   await page.waitForTimeout(275);
+ }
+ expect(await page.evaluate(()=>scrollY)).toBeLessThan(5);
+});
+
+test('continuous trackpad input can progress through all projects instead of stalling after two',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.waitForTimeout(1000);
+ await page.mouse.move(640,460);
+ // A true continuous gesture has no 125ms silence between wheel events.
+ for(let i=0;i<88;i++){
+   await page.mouse.wheel(0,14);
+   await page.waitForTimeout(61);
+ }
+ await expect.poll(async()=>page.evaluate(()=>window.scrollY),{timeout:5000}).toBeGreaterThan(400);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Sarabi Restaurant');
+ await expect(page.locator('.footer-top a')).toBeInViewport();
+});
+
+test('three feature video previews play when their slide becomes active',async({page})=>{
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ for(const project of ['Baby Nest','Reclaim','Yene Bet']){
+   await page.getByRole('button',{name:'Show '+project}).click();
+   const video=page.locator('.showcase-current .showcase-preview-film video');
+   await expect(video).toBeVisible();
+   await expect(video).toHaveAttribute('autoplay','');
+   await expect(video).toHaveAttribute('preload','auto');
+   await expect.poll(()=>video.evaluate((el:HTMLVideoElement)=>el.currentTime),{timeout:9000}).toBeGreaterThan(.2);
+ }
 });
