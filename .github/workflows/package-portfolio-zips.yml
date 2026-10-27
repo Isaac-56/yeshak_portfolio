@@ -1,4 +1,5 @@
 name: Package Yeshak portfolio ZIP files
+# Export current review-branch snapshot as downloadable source and website bundles.
 
 on:
   push:
