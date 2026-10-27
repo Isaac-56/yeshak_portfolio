@@ -162,13 +162,17 @@ function Home(){
   <Marquee/>
  </main>}
 function Marquee(){return <div className="marquee-band" aria-label="Design, development and interaction"><div aria-hidden="true">{Array.from({length:4},(_,i)=><span key={i}>DESIGN <b>✳</b> DEVELOPMENT <b>✳</b> INTERACTION <b>✳</b> </span>)}</div></div>}
-function PreviewVideo({p,controls=false}:{p:Project;controls?:boolean}){
+function PreviewVideo({p,controls=false,showcase=false}:{p:Project;controls?:boolean;showcase?:boolean}){
   const ref=useRef<HTMLVideoElement>(null);
   useEffect(()=>{
     const v=ref.current;if(!v || reduceMotion())return;
-    const io=new IntersectionObserver(items=>items.forEach(item=>{if(item.isIntersecting){v.play().catch(()=>{});}else v.pause();}),{threshold:.2});io.observe(v);return()=>io.disconnect();
-  },[]);
-  return <video ref={ref} src={`/projects/${p.slug}/preview.mp4`} muted={!controls} loop={!controls} playsInline preload="metadata" poster={`/projects/${p.slug}/poster.jpg`} controls={controls} aria-label={`${p.name} interface animation`}/>;
+    const play=()=>{v.play().catch(()=>{});};
+    if(showcase){v.currentTime=0;play();}
+    const io=new IntersectionObserver(items=>items.forEach(item=>{if(item.isIntersecting)play();else v.pause();}),{threshold:.16});
+    io.observe(v);
+    return()=>{io.disconnect();v.pause()};
+  },[p.slug,showcase]);
+  return <video ref={ref} src={`/projects/${p.slug}/preview.mp4`} autoPlay={showcase&&!controls} muted={!controls} loop={!controls} playsInline preload={showcase?'auto':'metadata'} poster={`/projects/${p.slug}/poster.jpg`} controls={controls} aria-label={`${p.name} interface animation`}/>;
 }
 function CoverDevices({p}:{p:Project}){
  const covers:Record<string,[number,number]>={'medical-app':[1,2],'directed':[3,2],'blog-app':[10,2],'sarabi':[1,13]};
@@ -404,7 +408,7 @@ function AllWork(){
            <div className="showcase-small-preview" aria-hidden="true">
              {selected && p.video
                ?<div className="showcase-preview-film">
-                  <PreviewVideo p={p}/>
+                  <PreviewVideo p={p} showcase/>
                   <span className="showcase-preview-tag">LIVE MOTION / 01</span>
                 </div>
                :<div className="showcase-preview-editorial">
