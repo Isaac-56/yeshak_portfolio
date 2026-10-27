@@ -340,6 +340,9 @@ function AllWork(){
      lastDelta=delta;
      burstCount+=1;
      burstDistance+=Math.min(delta,180);
+     // Catch gently tapering momentum even if the browser rounds repeated
+     // frames to identical wheel values (which breaks strict streak checks).
+     if(burstCount>=5 && peakDelta>=9 && delta<peakDelta*.72)momentumTail=true;
      lastWheelAt=now;
      lastDirection=direction;
      if(delta<2||burstDistance<7||momentumTail)return;
