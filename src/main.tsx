@@ -304,7 +304,11 @@ function AllWork(){
      event.preventDefault();
      const delta=Math.abs(event.deltaY)*(event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1);
      const reversed=direction!==lastDirection;
-     const newGesture=now-lastWheelAt>145||reversed;
+     // Trackpad momentum can have 150–300ms gaps near its tail.
+     // A same-direction value that keeps falling is still part of that
+     // original gesture, NOT a fresh wheel action, even after a small gap.
+     const fadingTail=lastDelta>3 && delta<lastDelta*.98 && now-lastWheelAt<430;
+     const newGesture=reversed||(now-lastWheelAt>285&&!fadingTail);
      if(newGesture){
        gestureConsumed=false;
        burstCount=0;
