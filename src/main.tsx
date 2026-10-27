@@ -264,12 +264,19 @@ function AllWork(){
  };
  useEffect(()=>{
    const el=stage.current;if(!el)return;
-   // On a trackpad a single gesture can contain hundreds of wheel events.
-   // A short flick advances once; intentional CONTINUED scrolling advances
-   // regularly even if no pause occurs. Reversal is always immediate.
+   // Treat an actual wheel/trackpad flick as one move. After it peaks,
+   // browsers continue emitting decaying "momentum" deltas even after the
+   // user's fingers leave the trackpad. That tail MUST NOT advance a slide.
+   // Sustained pressure (stable or accelerating deltas) may keep advancing,
+   // so a deliberate long scroll still traverses the whole gallery.
    let lastWheelAt=0;
    let lastDirection=0;
    let lastAdvanceAt=0;
+   let lastDelta=0;
+   let peakDelta=0;
+   let slowingFrames=0;
+   let acceleratingFrames=0;
+   let momentumTail=false;
    let burstCount=0;
    let burstDistance=0;
    let gestureConsumed=false;
@@ -297,21 +304,50 @@ function AllWork(){
      event.preventDefault();
      const delta=Math.abs(event.deltaY)*(event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1);
      const reversed=direction!==lastDirection;
-     const newGesture=now-lastWheelAt>125||reversed;
+     const newGesture=now-lastWheelAt>145||reversed;
      if(newGesture){
        gestureConsumed=false;
        burstCount=0;
        burstDistance=0;
+       lastDelta=0;
+       peakDelta=0;
+       slowingFrames=0;
+       acceleratingFrames=0;
+       momentumTail=false;
+     }else if(lastDelta>=6){
+       if(delta<lastDelta*.86){
+         slowingFrames+=1;
+         acceleratingFrames=0;
+       }else if(delta>lastDelta*1.22){
+         acceleratingFrames+=1;
+         slowingFrames=0;
+       }else if(delta>=lastDelta*.98){
+         slowingFrames=Math.max(0,slowingFrames-1);
+         acceleratingFrames=0;
+       }
+       if(slowingFrames>=3)momentumTail=true;
+       // A renewed deliberate swipe while the tail is still playing
+       // should start a fresh gesture, but one noisy event won't suffice.
+       if(momentumTail&&acceleratingFrames>=2&&delta>=9){
+         momentumTail=false;
+         gestureConsumed=false;
+         burstCount=0;
+         burstDistance=0;
+         slowingFrames=0;
+       }
      }
+     peakDelta=Math.max(peakDelta,delta);
+     lastDelta=delta;
      burstCount+=1;
      burstDistance+=Math.min(delta,180);
      lastWheelAt=now;
      lastDirection=direction;
-     if(delta<2||burstDistance<7)return;
-     // Sustained trackpad scrolling re-arms only after meaningful continued
-     // movement AND time, never on a second huge pulse from one fling.
+     if(delta<2||burstDistance<7||momentumTail)return;
+     // Do not auto-advance on a fading inertia tail. Stable, sustained
+     // movement advances at most once per ~650ms.
      const sustained=gestureConsumed && burstCount>=8 &&
-       burstDistance>=145 && now-lastAdvanceAt>=520;
+       burstDistance>=145 && delta>=Math.max(9,peakDelta*.38) &&
+       now-lastAdvanceAt>=650;
      if(gestureConsumed&&!sustained)return;
      if(!reversed&&now-lastAdvanceAt<210)return;
      gestureConsumed=true;
