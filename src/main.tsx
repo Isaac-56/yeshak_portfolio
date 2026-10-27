@@ -210,6 +210,14 @@ const showcaseStaticSequences:Record<string,number[]>={
   'blog-app':[10,4,8,12,16,18,2],
   'sarabi':[1,5,9,13,7,11,3]
 };
+// Each mini-gallery has its own Figma frames. These never duplicate the
+// moving main artwork, even after many autoplay cycles.
+const showcaseMiniSequences:Record<string,number[]>={
+ 'medical-app':[36,37,38,39,40,41,42],
+ 'directed':[1,4,5,14,20,29,30],
+ 'blog-app':[1,3,5,7,9,11,13],
+ 'sarabi':[13,7,11,3,5,9,10]
+};
 const showcasePalettes=[
  {bg:'#DFCECA',ink:'#482C35',accent:'#9A515A',deep:'#281C29',onDark:'#FFE7DF'},
  {bg:'#466980',ink:'#F6F2EA',accent:'#F6E3A6',deep:'#152C3C',onDark:'#F6F2EA'},
@@ -395,8 +403,9 @@ function AllWork(){
        const dynamicScreen=(offset:number)=>sequence&&selected?sequence[(imageStep+offset)%sequence.length]:selectedScreens[offset%3];
        // The companion thumbnail deliberately uses different screens than
        // the three large devices, so it adds information instead of repeating.
-       const miniScreen=(offset:number)=>sequence
-         ?sequence[((selected?imageStep:0)+3+offset)%sequence.length]
+       const previewOnly=showcaseMiniSequences[p.slug];
+       const miniScreen=(offset:number)=>previewOnly
+         ?previewOnly[((selected?imageStep:0)+offset)%previewOnly.length]
          :selectedScreens[(offset+1)%3];
        return <section key={p.slug} className={'archive-panel showcase-slide showcase-'+phase} aria-hidden={!selected} data-project-index={i} data-project-slug={p.slug}>
          <div className="showcase-copy">
