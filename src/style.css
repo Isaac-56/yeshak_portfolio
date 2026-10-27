@@ -1064,3 +1064,107 @@
  .showcase-slide.archive-panel,.showcase-slide.showcase-current,
  .showcase-copy,.showcase-visual-rail,.showcase-feature{transition:none!important}
 }
+
+
+/* Work V6 — directional full-stage choreography. Animate only the three
+   mounted slides, not seven full-screen image/video stacks at once. */
+.showcase-travel-forward .showcase-current .showcase-visual-rail{
+  animation:showcase-rail-from-bottom .72s cubic-bezier(.18,.82,.27,1) both;
+}
+.showcase-travel-backward .showcase-current .showcase-visual-rail{
+  animation:showcase-rail-from-top .72s cubic-bezier(.18,.82,.27,1) both;
+}
+@keyframes showcase-rail-from-bottom{
+  from{opacity:.25;transform:rotate(5deg) skewX(-9deg) translate3d(0,14%,0) scale(.955)}
+  to{opacity:1;transform:rotate(6deg) skewX(-9deg) translate3d(0,0,0) scale(1)}
+}
+@keyframes showcase-rail-from-top{
+  from{opacity:.25;transform:rotate(7deg) skewX(-9deg) translate3d(0,-14%,0) scale(.955)}
+  to{opacity:1;transform:rotate(6deg) skewX(-9deg) translate3d(0,0,0) scale(1)}
+}
+.showcase-current .showcase-overline,
+.showcase-current .showcase-project-name,
+.showcase-current .showcase-project-label,
+.showcase-current .showcase-project-summary,
+.showcase-current .showcase-case-link{
+  animation:showcase-text-rise .64s cubic-bezier(.2,.85,.24,1) both;
+}
+.showcase-current .showcase-overline{animation-delay:.03s}
+.showcase-current .showcase-project-name{animation-delay:.08s}
+.showcase-current .showcase-project-label{animation-delay:.13s}
+.showcase-current .showcase-project-summary{animation-delay:.18s}
+.showcase-current .showcase-case-link{animation-delay:.23s}
+@keyframes showcase-text-rise{
+  from{opacity:0;transform:translate3d(0,19px,0);filter:blur(2px)}
+  to{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}
+}
+.showcase-current .showcase-small-preview{
+  animation:showcase-preview-lift .66s .21s cubic-bezier(.2,.85,.24,1) both;
+}
+@keyframes showcase-preview-lift{
+  from{opacity:0;transform:translate3d(0,19px,0) scale(.975)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+/* All featured galleries feel alive even when showing original static Figma
+   frames. The independent frame movements do not crop or distort any screens. */
+.showcase-current .showcase-phone:nth-child(1){
+  animation:showcase-device-left 5.6s ease-in-out infinite alternate;
+}
+.showcase-current .showcase-phone:nth-child(2){
+  animation:showcase-device-center 6.5s ease-in-out infinite alternate;
+}
+.showcase-current .showcase-phone:nth-child(3){
+  animation:showcase-device-right 6.1s ease-in-out infinite alternate;
+}
+@keyframes showcase-device-left{
+  from{transform:translateY(10%) rotate(-10deg)}
+  to{transform:translateY(5%) rotate(-8deg)}
+}
+@keyframes showcase-device-center{
+  from{transform:translateY(-6%) scale(1.13)}
+  to{transform:translateY(-9%) scale(1.14)}
+}
+@keyframes showcase-device-right{
+  from{transform:translateY(7%) rotate(9deg)}
+  to{transform:translateY(3%) rotate(7deg)}
+}
+.showcase-current .showcase-preview-device{
+  animation:showcase-mini-float-a 5.8s ease-in-out infinite alternate;
+}
+.showcase-current .showcase-preview-device-alt{
+  animation:showcase-mini-float-b 6.4s ease-in-out infinite alternate;
+}
+@keyframes showcase-mini-float-a{
+  from{transform:rotate(-8deg) translateY(7px)}
+  to{transform:rotate(-6deg) translateY(1px)}
+}
+@keyframes showcase-mini-float-b{
+  from{transform:rotate(9deg) translateY(-4px)}
+  to{transform:rotate(7deg) translateY(2px)}
+}
+@keyframes showcase-preview-enter{
+  from{opacity:.15;transform:translate3d(0,4px,0) scale(1.015)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+.showcase-current .showcase-preview-film video{
+  object-fit:contain;
+  width:100%;
+  height:100%;
+  display:block;
+  background:#111722;
+}
+.showcase-current .showcase-preview-editorial,
+.showcase-current .showcase-preview-film{
+  backface-visibility:hidden;
+}
+@media(prefers-reduced-motion:reduce){
+  .showcase-current .showcase-visual-rail,
+  .showcase-current .showcase-overline,
+  .showcase-current .showcase-project-name,
+  .showcase-current .showcase-project-label,
+  .showcase-current .showcase-project-summary,
+  .showcase-current .showcase-case-link,
+  .showcase-current .showcase-small-preview,
+  .showcase-current .showcase-phone,
+  .showcase-current .showcase-preview-device{animation:none!important}
+}
