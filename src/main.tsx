@@ -315,7 +315,7 @@ function AllWork(){
        acceleratingFrames=0;
        momentumTail=false;
      }else if(lastDelta>=6){
-       if(delta<lastDelta*.86){
+       if(delta<lastDelta*.965){
          slowingFrames+=1;
          acceleratingFrames=0;
        }else if(delta>lastDelta*1.22){
