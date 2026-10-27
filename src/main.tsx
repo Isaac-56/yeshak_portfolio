@@ -252,14 +252,15 @@ function AllWork(){
  };
  useEffect(()=>{
    const el=stage.current;if(!el)return;
-   // A reverse wheel gesture must never inherit the forward animation lock.
-   // Mouse-wheel notches are allowed promptly; short trackpad bursts count as
-   // one gesture. In the footer, a reverse gesture returns directly to Sarabi.
+   // On a trackpad a single gesture can contain hundreds of wheel events.
+   // A short flick advances once; intentional CONTINUED scrolling advances
+   // regularly even if no pause occurs. Reversal is always immediate.
    let lastWheelAt=0;
    let lastDirection=0;
    let lastAdvanceAt=0;
+   let burstCount=0;
+   let burstDistance=0;
    let gestureConsumed=false;
-   let gestureDistance=0;
    const wheel=(event:WheelEvent)=>{
      if(event.ctrlKey||event.deltaY===0)return;
      const now=performance.now();
@@ -272,28 +273,38 @@ function AllWork(){
          lastWheelAt=now;
          lastDirection=direction;
          gestureConsumed=true;
+         burstCount=0;
+         burstDistance=0;
          lastAdvanceAt=now;
          return;
-       }else return; // Native scrolling remains available within the footer.
+       }else return;
      }
      const rect=el.getBoundingClientRect();
      if(rect.bottom<=window.innerHeight*.47||rect.top>=window.innerHeight*.53)return;
+     if(!event.cancelable)return;
      event.preventDefault();
-     const amount=Math.abs(event.deltaY)*(event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1);
+     const delta=Math.abs(event.deltaY)*(event.deltaMode===1?16:event.deltaMode===2?window.innerHeight:1);
      const reversed=direction!==lastDirection;
-     const fresh=now-lastWheelAt>105||reversed;
-     if(fresh){
+     const newGesture=now-lastWheelAt>125||reversed;
+     if(newGesture){
        gestureConsumed=false;
-       gestureDistance=0;
+       burstCount=0;
+       burstDistance=0;
      }
-     gestureDistance+=amount;
+     burstCount+=1;
+     burstDistance+=Math.min(delta,180);
      lastWheelAt=now;
      lastDirection=direction;
-     if(gestureDistance<7||gestureConsumed)return;
-     // Do not throw away the first reverse notch because the prior forward
-     // transition is still settling. It should respond immediately.
-     if(!reversed&&now-lastAdvanceAt<175)return;
+     if(delta<2||burstDistance<7)return;
+     // Sustained trackpad scrolling re-arms only after meaningful continued
+     // movement AND time, never on a second huge pulse from one fling.
+     const sustained=gestureConsumed && burstCount>=8 &&
+       burstDistance>=145 && now-lastAdvanceAt>=520;
+     if(gestureConsumed&&!sustained)return;
+     if(!reversed&&now-lastAdvanceAt<210)return;
      gestureConsumed=true;
+     burstCount=0;
+     burstDistance=0;
      lastAdvanceAt=now;
      if(direction>0&&position.current===count-1){revealFooter();return;}
      stepTo(position.current+direction);
@@ -369,6 +380,10 @@ function AllWork(){
      <div className="showcase-topline"><span>SELECTED WORK / 2026</span><span>DESIGN × DEVELOPMENT</span></div>
      <div className="showcase-scenes">
      {projects.map((p,i)=>{
+       // Only the active panel and its immediate neighbors should render.
+       // The previous version rendered seven animated heavy media scenes at
+       // once, which degraded transitions after the first two projects.
+       if(Math.abs(i-active)>1)return null;
        const selected=active===i;
        const phase=i<active?'before':i>active?'after':'current';
        const selectedScreens=showcaseFeatureScreens[p.slug]??[1,2,3];
