@@ -205,7 +205,7 @@ test('homepage all-work link opens the immersive archive', async ({page})=>{
   await page.goto('/');
   await page.getByRole('link',{name:/Explore every project/}).click();
   await expect(page).toHaveURL(/\/work$/);
-  await expect(page.locator('.archive-panel')).toHaveCount(7);
+  await expect(page.locator('.archive-panel')).toHaveCount(2); // Active + adjacent only
 });
 
 test('desktop hero navigation is visibly larger', async ({page})=>{
