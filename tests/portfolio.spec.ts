@@ -459,3 +459,44 @@ test('three feature video previews play when their slide becomes active',async({
    await expect.poll(()=>video.evaluate((el:HTMLVideoElement)=>el.currentTime),{timeout:9000}).toBeGreaterThan(.2);
  }
 });
+
+
+test('one long momentum tail never scrolls an EXTRA project after the wheel stops',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.waitForTimeout(900);
+ await page.mouse.move(640,430);
+ // Simulate a real trackpad fling: high initial speed, followed by a
+ // browser-generated, gradually decaying wheel stream after finger release.
+ for(let i=0;i<26;i++){
+   await page.mouse.wheel(0,Math.max(2,Math.round(110*Math.pow(.89,i))));
+   await page.waitForTimeout(48);
+ }
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+ await page.waitForTimeout(1050); // Allow entrance animation and inertia to settle.
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Reclaim');
+ expect(await page.evaluate(()=>scrollY)).toBeLessThan(6);
+ // A NEW deliberate wheel input still advances immediately.
+ await page.mouse.wheel(0,65);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Yene Bet');
+});
+
+test('momentum after Sarabi never opens the footer without a new scroll',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.goto('/work');
+ await expect(page.locator('.preloader')).toHaveClass(/preloader-finished/);
+ await page.getByRole('button',{name:'Show Blog App'}).click();
+ await page.waitForTimeout(400);
+ await page.mouse.move(650,420);
+ for(let i=0;i<25;i++){
+   await page.mouse.wheel(0,Math.max(2,Math.round(95*Math.pow(.89,i))));
+   await page.waitForTimeout(42);
+ }
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Sarabi Restaurant');
+ await page.waitForTimeout(900);
+ await expect(page.locator('.showcase-current .showcase-project-name')).toHaveText('Sarabi Restaurant');
+ expect(await page.evaluate(()=>scrollY)).toBeLessThan(6);
+ await page.mouse.wheel(0,70);
+ await expect.poll(()=>page.evaluate(()=>scrollY),{timeout:5000}).toBeGreaterThan(450);
+});
